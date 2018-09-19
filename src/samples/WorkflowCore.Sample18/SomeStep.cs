@@ -2,11 +2,10 @@
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
-namespace WorkflowCore.Sample04.Steps
+namespace WorkflowCore.Sample18
 {
-    public class CustomMessage : StepBody
+    public class SomeStep : StepBody
     {
-        
         public string Message { get; set; }
 
         public override ExecutionResult Run(IStepExecutionContext context)
