@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -181,10 +182,31 @@ namespace WorkflowCore.Services
             {
                 var member = (output.Target.Body as MemberExpression);
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
-                var data = workflow.Data;
-                var property = data.GetType().GetProperty(member.Member.Name);
-                var convertedValue = Convert.ChangeType(resolvedValue, property.PropertyType);
-                property.SetValue(data, convertedValue);
+                if (member == null) // if this true try work with property as Dictionary
+                {
+                    if (output.Target.Body is MethodCallExpression methodCall && methodCall.Object.Type.GetInterfaces().Any(i => 
+                            String.Equals(i.FullName, typeof(IDictionary).FullName,
+                                StringComparison.OrdinalIgnoreCase)))
+                    {   
+                        // definitely dictionary :)
+                        var key = ((ConstantExpression) methodCall.Arguments.FirstOrDefault())?.Value.ToString();
+                        var dictName = ((MemberExpression) methodCall.Object)?.Member.Name;
+                        if (!(string.IsNullOrEmpty(key) && string.IsNullOrEmpty(dictName)))
+                        {
+                            var dict =
+                                workflow.Data.GetType().GetProperty(dictName).GetValue(workflow.Data) as
+                                    IDictionary;
+                            dict[key] = resolvedValue;
+                        }
+                    }
+                }
+                else
+                {
+                    var data = workflow.Data;
+                    var property = data.GetType().GetProperty(member.Member.Name);
+                    var convertedValue = Convert.ChangeType(resolvedValue, property.PropertyType);
+                    property.SetValue(data, convertedValue);
+                }
             }
         }
 
