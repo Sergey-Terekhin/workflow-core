@@ -182,6 +182,7 @@ namespace WorkflowCore.Services
             {
                 var member = (output.Target.Body as MemberExpression);
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
+<<<<<<< HEAD
                 if (member == null) // if this true try work with property as Dictionary
                 {
                     if (output.Target.Body is MethodCallExpression methodCall && methodCall.Object.Type.GetInterfaces().Any(i => 
@@ -206,6 +207,8 @@ namespace WorkflowCore.Services
                     var property = data.GetType().GetProperty(member.Member.Name);
                     var convertedValue = Convert.ChangeType(resolvedValue, property.PropertyType);
                     property.SetValue(data, convertedValue);
+=======
+>>>>>>> pr/1
                 }
             }
         }
