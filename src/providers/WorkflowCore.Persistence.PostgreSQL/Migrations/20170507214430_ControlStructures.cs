@@ -1,43 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using WorkflowCore.Persistence.EntityFramework;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     public partial class ControlStructures : Migration
     {
+        private readonly string _tablePrefix = MigrationMetaInfo.TableNamePrefix;
+        private readonly string _schema = MigrationMetaInfo.DbSchema;
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ExecutionError_ExecutionPointer_ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError");
 
             migrationBuilder.DropIndex(
                 name: "IX_ExecutionError_ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError");
 
             migrationBuilder.DropColumn(
                 name: "PathTerminator",
-                schema: "wfc",
-                table: "ExecutionPointer");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer");
 
             migrationBuilder.DropColumn(
                 name: "Id",
-                schema: "wfc",
-                table: "ExecutionError");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError");
 
             migrationBuilder.RenameColumn(
                 name: "ConcurrentFork",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 newName: "RetryCount");
 
             migrationBuilder.AlterColumn<string>(
                 name: "StepName",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 maxLength: 100,
                 nullable: true,
                 oldClrType: typeof(string),
@@ -45,8 +48,8 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "EventName",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 maxLength: 100,
                 nullable: true,
                 oldClrType: typeof(string),
@@ -54,8 +57,8 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "EventKey",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 maxLength: 100,
                 nullable: true,
                 oldClrType: typeof(string),
@@ -63,35 +66,35 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "Children",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ContextItem",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "PredecessorId",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 maxLength: 100,
                 nullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 maxLength: 100,
                 nullable: true,
                 oldClrType: typeof(long));
 
             migrationBuilder.AddColumn<string>(
                 name: "WorkflowId",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 maxLength: 100,
                 nullable: true);
         }
@@ -100,34 +103,34 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "Children",
-                schema: "wfc",
-                table: "ExecutionPointer");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer");
 
             migrationBuilder.DropColumn(
                 name: "ContextItem",
-                schema: "wfc",
-                table: "ExecutionPointer");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer");
 
             migrationBuilder.DropColumn(
                 name: "PredecessorId",
-                schema: "wfc",
-                table: "ExecutionPointer");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer");
 
             migrationBuilder.DropColumn(
                 name: "WorkflowId",
-                schema: "wfc",
-                table: "ExecutionError");
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError");
 
             migrationBuilder.RenameColumn(
                 name: "RetryCount",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 newName: "ConcurrentFork");
 
             migrationBuilder.AlterColumn<string>(
                 name: "StepName",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldMaxLength: 100,
@@ -135,8 +138,8 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "EventName",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldMaxLength: 100,
@@ -144,8 +147,8 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "EventKey",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldMaxLength: 100,
@@ -153,15 +156,15 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AddColumn<bool>(
                 name: "PathTerminator",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AlterColumn<long>(
                 name: "ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldMaxLength: 100,
@@ -169,24 +172,24 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "Id",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 maxLength: 50,
                 nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExecutionError_ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 column: "ExecutionPointerId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ExecutionError_ExecutionPointer_ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 column: "ExecutionPointerId",
-                principalSchema: "wfc",
-                principalTable: "ExecutionPointer",
+                principalSchema: _schema,
+                principalTable: _tablePrefix + "ExecutionPointer",
                 principalColumn: "PersistenceId",
                 onDelete: ReferentialAction.Cascade);
         }

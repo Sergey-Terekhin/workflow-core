@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
@@ -17,7 +18,8 @@ namespace WorkflowCore.Persistence.PostgreSQL
 
         public WorkflowDbContext Build()
         {
-            return new PostgresContext(_connectionString);
+            return new PostgresContext(_connectionString, MigrationMetaInfo.DbSchema,
+                MigrationMetaInfo.TableNamePrefix);
         }
     }
 }
