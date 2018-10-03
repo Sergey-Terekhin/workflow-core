@@ -1,6 +1,5 @@
 ﻿using System;
 using WorkflowCore.Models;
-using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.SqlServer;
 

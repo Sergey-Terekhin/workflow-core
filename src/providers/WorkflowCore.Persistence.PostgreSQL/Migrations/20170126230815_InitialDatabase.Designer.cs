@@ -1,11 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using WorkflowCore.Persistence.PostgreSQL;
-using WorkflowCore.Models;
-using WorkflowCore.Persistence.EntityFramework;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {

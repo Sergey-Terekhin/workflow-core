@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.PostgreSQL;
-
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresContext))]

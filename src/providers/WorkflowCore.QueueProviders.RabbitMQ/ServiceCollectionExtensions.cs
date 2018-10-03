@@ -1,8 +1,6 @@
 ﻿using RabbitMQ.Client;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WorkflowCore.Models;
 using WorkflowCore.QueueProviders.RabbitMQ.Services;
 
