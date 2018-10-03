@@ -3,15 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
 using FluentAssertions;
 using Xunit;
-using WorkflowCore.Primitives;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace WorkflowCore.UnitTests.Services
 {
@@ -223,6 +220,54 @@ namespace WorkflowCore.UnitTests.Services
             data.Value1.Should().Be(7);
         }
 
+        [Fact(DisplayName = "Should map dynamic outputs")]
+        public void should_map_outputs_dynamic()
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
+            Expression<Func<DynamicDataClass, IStepExecutionContext, int>> v1 = (x, context) => x["Value1"];
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            A.CallTo(() => step1Body.Property1).Returns(7);
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping()
+                    {
+                        Source = p1,
+                        Target = v1
+                    }
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DynamicDataClass()
+            {
+                ["Value1"] = 5
+            };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data["Value1"].Should().Be(7);
+        }
+
         [Fact(DisplayName = "Should handle step exception")]
         public void should_handle_step_exception()
         {
@@ -332,6 +377,17 @@ namespace WorkflowCore.UnitTests.Services
             public int Value1 { get; set; }
             public int Value2 { get; set; }
             public int Value3 { get; set; }
+        }
+
+        public class DynamicDataClass
+        {
+            public Dictionary<string, int> Storage { get; set; } = new Dictionary<string, int>();
+
+            public int this[string propertyName]
+            {
+                get => Storage[propertyName];
+                set => Storage[propertyName] = value;
+            }
         }
     }
 }

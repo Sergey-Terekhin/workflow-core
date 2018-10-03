@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
@@ -63,7 +62,7 @@ namespace WorkflowCore.UnitTests
 
             var retrievedWorkflow = Subject.GetWorkflowInstance(workflowId).Result;
 
-            retrievedWorkflow.ShouldBeEquivalentTo(workflow);
+            retrievedWorkflow.Should().BeEquivalentTo(workflow);
         }
 
         [Fact]
@@ -96,7 +95,7 @@ namespace WorkflowCore.UnitTests
             Subject.PersistWorkflow(newWorkflow).Wait();
 
             var current = Subject.GetWorkflowInstance(workflowId).Result;
-            current.ShouldBeEquivalentTo(newWorkflow);
+            current.Should().BeEquivalentTo(newWorkflow);
         }
 
         [Fact]
@@ -137,7 +136,7 @@ namespace WorkflowCore.UnitTests
 
             Parallel.ForEach(actions, action =>
             {
-                action.ShouldNotThrow<InvalidOperationException>();
+                action.Should().NotThrow<InvalidOperationException>();
             });
         }
     }

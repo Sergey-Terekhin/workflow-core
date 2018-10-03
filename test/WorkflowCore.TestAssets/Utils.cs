@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 
@@ -22,6 +20,11 @@ namespace WorkflowCore.TestAssets
         {
             //return Properties.Resources.ResourceManager.GetString("stored_definition");
             return File.ReadAllText("stored-definition.json");
+        }
+
+        public static string GetTestDefinitionDynamicJson()
+        {
+            return File.ReadAllText("stored-dynamic-definition.json");
         }
     }
 }

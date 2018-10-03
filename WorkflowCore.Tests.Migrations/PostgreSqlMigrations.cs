@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using WorkflowCore.Interface;
 using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.PostgreSQL;
 using Xunit;
