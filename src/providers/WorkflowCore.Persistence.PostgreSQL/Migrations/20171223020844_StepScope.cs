@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
-using System.Collections.Generic;
 using WorkflowCore.Persistence.EntityFramework;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
