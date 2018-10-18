@@ -9,6 +9,7 @@ using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 using WorkflowCore.Models.DefinitionStorage.v1;
 using WorkflowCore.Exceptions;
+using WorkflowCore.Services.FluentBuilders;
 
 namespace WorkflowCore.Services.DefinitionStorage
 {
@@ -192,21 +193,33 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 var dataParameter = Expression.Parameter(dataType, "data");
                 Expression targetProperty;
-                
+                LambdaExpression targetExpr;
                 // Check if our datatype has a matching property
                 var propertyInfo = dataType.GetProperty(output.Key);
                 if (propertyInfo != null)
                 {
                     targetProperty = Expression.Property(dataParameter, propertyInfo);
+                     targetExpr = Expression.Lambda(targetProperty, dataParameter);
                 }
                 else
                 {
                     // If we did not find a matching property try to find a Indexer with string parameter
                     propertyInfo = dataType.GetProperty("Item");
-                    targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
+                    if (propertyInfo != null)
+                    {
+                        targetProperty =
+                            Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
+                        targetExpr = Expression.Lambda(targetProperty, dataParameter);
+                    }
+                    else
+                    {
+                        // last try. If property a dict
+                        targetExpr = DynamicExpressionParser.ParseLambda(dataParameter.Type,
+                            stepType.GetProperties().First(x =>
+                                    String.Equals(x.Name, dataParameter.Name, StringComparison.OrdinalIgnoreCase))
+                                .PropertyType, output.Key);
+                    }
                 }
-                var targetExpr = Expression.Lambda(targetProperty, dataParameter);
-
                 step.Outputs.Add(new DataMapping
                 {
                     Source = sourceExpr,
