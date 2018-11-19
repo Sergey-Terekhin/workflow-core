@@ -214,9 +214,10 @@ namespace WorkflowCore.Services.DefinitionStorage
                     else
                     {
                         // last try. If property a dict
+                        var member = ((sourceExpr.Body as UnaryExpression)?.Operand as MemberExpression)?.Member.Name;
                         targetExpr = DynamicExpressionParser.ParseLambda(dataParameter.Type,
                             stepType.GetProperties().First(x =>
-                                    String.Equals(x.Name, dataParameter.Name, StringComparison.OrdinalIgnoreCase))
+                                    String.Equals(x.Name, member, StringComparison.OrdinalIgnoreCase))
                                 .PropertyType, output.Key);
                     }
                 }
