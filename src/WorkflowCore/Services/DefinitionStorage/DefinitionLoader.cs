@@ -23,7 +23,7 @@ namespace WorkflowCore.Services.DefinitionStorage
         {
             _registry = registry;
         }
-                        
+
         public WorkflowDefinition LoadDefinition(string json)
         {
             var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
@@ -79,7 +79,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 {
                     var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
                     var dataParameter = Expression.Parameter(dataType, "data");
-                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
+                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] {dataParameter}, typeof(bool), nextStep.CancelCondition);
                     targetStep.CancelCondition = cancelExpr;
                 }
 
@@ -114,10 +114,10 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
 
                 if (!string.IsNullOrEmpty(nextStep.NextStepId))
-                    targetStep.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{nextStep.NextStepId}" });
+                    targetStep.Outcomes.Add(new StepOutcome() {ExternalNextStepId = $"{nextStep.NextStepId}"});
 
                 result.Add(targetStep);
-                
+
                 i++;
             }
 
@@ -171,7 +171,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new [] { dataParameter, contextParameter }, typeof(object), input.Value);
+                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] {dataParameter, contextParameter}, typeof(object), input.Value);
 
                 var stepParameter = Expression.Parameter(stepType, "step");
                 var targetProperty = Expression.Property(stepParameter, input.Key);
@@ -186,11 +186,11 @@ namespace WorkflowCore.Services.DefinitionStorage
             foreach (var output in source.Outputs)
             {
                 var stepParameter = Expression.Parameter(stepType, "step");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { stepParameter }, typeof(object), output.Value);
+                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] {stepParameter}, typeof(object), output.Value);
 
                 var dataParameter = Expression.Parameter(dataType, "data");
                 Expression targetProperty;
-                
+
                 // Check if our datatype has a matching property
                 var propertyInfo = dataType.GetProperty(output.Key);
                 if (propertyInfo != null)
@@ -201,15 +201,30 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
                 else
                 {
+                    Action<IStepBody, object> acn;
                     // If we did not find a matching property try to find a Indexer with string parameter
                     propertyInfo = dataType.GetProperty("Item");
-                    targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
-                    
-                    Action<IStepBody, object> acn = (pStep, pData) =>
+                    if (propertyInfo == null)
                     {
-                        object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
-                        propertyInfo.SetValue(pData, resolvedValue, new object[] { output.Key });
-                    };
+                        //if dict in context
+                        acn = (pStep, pData) =>
+                        {
+                            object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
+                            var targetExpr = DynamicExpressionParser.ParseLambda(new[] {Expression.Parameter(dataType)}, null,
+                                output.Key, null);
+                            var setter = CreateSetter(targetExpr);
+                            setter.Compile().DynamicInvoke(pData, resolvedValue);
+                        };
+                    }
+
+                    else
+                    {
+                        acn = (pStep, pData) =>
+                        {
+                            object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
+                            propertyInfo.SetValue(pData, resolvedValue, new object[] {output.Key});
+                        };
+                    }
 
                     step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
                 }
@@ -221,5 +236,27 @@ namespace WorkflowCore.Services.DefinitionStorage
             return Type.GetType(name, true, true);
         }
 
+        public LambdaExpression CreateSetter(LambdaExpression getterExpression)
+        {
+            var valueParameter = Expression.Parameter(getterExpression.ReturnType, "value");
+            Expression assignment;
+            if (getterExpression.Body is MethodCallExpression callExpression && callExpression.Method.Name == "get_Item")
+            {
+                //Get Matching setter method for the indexer
+                var parameterTypes = callExpression.Method.GetParameters()
+                    .Select(p => p.ParameterType)
+                    .ToArray();
+                var itemProperty = callExpression.Method.DeclaringType.GetProperty("Item", valueParameter.Type, parameterTypes);
+
+                assignment = Expression.Call(callExpression.Object, itemProperty.SetMethod, callExpression.Arguments.Concat(new[] {valueParameter}));
+            }
+            else
+            {
+                assignment = Expression.Assign(getterExpression.Body, valueParameter);
+            }
+
+            var parameters = getterExpression.Parameters.Concat(new[] {valueParameter}).ToArray();
+            return Expression.Lambda(assignment, parameters);
+        }
     }
 }
