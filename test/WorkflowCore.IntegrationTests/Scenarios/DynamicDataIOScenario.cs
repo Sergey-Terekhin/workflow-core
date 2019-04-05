@@ -38,15 +38,15 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public class DataIOWorkflow : IWorkflow<MyDataClass>
         {
-            public string Id => "DataIOWorkflow";
+            public string Id => "DynamicDataIOWorkflow";
             public int Version => 1;
             public void Build(IWorkflowBuilder<MyDataClass> builder)
             {
                 builder
                     .StartWith<AddNumbers>()
-                    .Input(step => step.Input1, data => data.Value1)
-                    .Input(step => step.Input2, data => data.Value2)
-                    .Output(data => data["Value3"], step => step.Output);
+                        .Input(step => step.Input1, data => data.Value1)
+                        .Input(step => step.Input2, data => data.Value2)
+                        .Output((step, data) => data["Value3"] = step.Output);
             }
         }
 

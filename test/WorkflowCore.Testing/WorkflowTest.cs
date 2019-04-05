@@ -16,7 +16,7 @@ namespace WorkflowCore.Testing
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
-
+        
         protected virtual void Setup()
         {
             //setup dependency injection
@@ -37,7 +37,7 @@ namespace WorkflowCore.Testing
             Host.Start();
         }
 
-        private void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
+        protected void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
         {
             UnhandledStepErrors.Add(new StepError()
             {

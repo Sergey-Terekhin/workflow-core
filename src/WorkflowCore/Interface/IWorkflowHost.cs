@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Interface
 {
@@ -18,6 +19,7 @@ namespace WorkflowCore.Interface
         
         
         event StepErrorEventHandler OnStepError;
+        event LifeCycleEventHandler OnLifeCycleEvent;
         void ReportStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception);
 
         //public dependencies to allow for extension method access
@@ -31,4 +33,5 @@ namespace WorkflowCore.Interface
     }
 
     public delegate void StepErrorEventHandler(WorkflowInstance workflow, WorkflowStep step, Exception exception);
+    public delegate void LifeCycleEventHandler(LifeCycleEvent evt);
 }
