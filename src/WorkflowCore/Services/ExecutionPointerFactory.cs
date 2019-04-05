@@ -8,7 +8,6 @@ namespace WorkflowCore.Services
 {
     public class ExecutionPointerFactory : IExecutionPointerFactory
     {
-
         public ExecutionPointer BuildGenesisPointer(WorkflowDefinition def)
         {
             return new ExecutionPointer
@@ -17,7 +16,7 @@ namespace WorkflowCore.Services
                 StepId = 0,
                 Active = true,
                 Status = PointerStatus.Pending,
-                StepName = Enumerable.First<WorkflowStep>(def.Steps, x => x.Id == 0).Name
+                StepName = def.Steps.FindById(0).Name
             };
         }
 
@@ -32,16 +31,16 @@ namespace WorkflowCore.Services
                 Active = true,
                 ContextItem = pointer.ContextItem,
                 Status = PointerStatus.Pending,
-                StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name,
-                Scope = new Stack<string>(pointer.Scope)
+                StepName = def.Steps.FindById(outcomeTarget.NextStep).Name,
+                Scope = new List<string>(pointer.Scope)
             };            
         }
 
         public ExecutionPointer BuildChildPointer(WorkflowDefinition def, ExecutionPointer pointer, int childDefinitionId, object branch)
         {
             var childPointerId = GenerateId();
-            var childScope = new Stack<string>(pointer.Scope);
-            childScope.Push(pointer.Id);
+            var childScope = new List<string>(pointer.Scope);
+            childScope.Insert(0, pointer.Id);
             pointer.Children.Add(childPointerId);
 
             return new ExecutionPointer()
@@ -52,8 +51,8 @@ namespace WorkflowCore.Services
                 Active = true,
                 ContextItem = branch,
                 Status = PointerStatus.Pending,
-                StepName = def.Steps.First(x => x.Id == childDefinitionId).Name,
-                Scope = childScope
+                StepName = def.Steps.FindById(childDefinitionId).Name,
+                Scope = new List<string>(childScope)
             };            
         }
 
@@ -68,8 +67,8 @@ namespace WorkflowCore.Services
                 Active = true,
                 ContextItem = pointer.ContextItem,
                 Status = PointerStatus.Pending,
-                StepName = def.Steps.First(x => x.Id == compensationStepId).Name,
-                Scope = new Stack<string>(pointer.Scope)
+                StepName = def.Steps.FindById(compensationStepId).Name,
+                Scope = new List<string>(pointer.Scope)
             };
         }
 

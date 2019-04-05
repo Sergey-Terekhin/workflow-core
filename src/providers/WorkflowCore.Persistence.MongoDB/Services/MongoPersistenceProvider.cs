@@ -23,8 +23,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         static MongoPersistenceProvider()
         {
             BsonClassMap.RegisterClassMap<WorkflowInstance>(x =>
-            {                
-                x.MapIdProperty(y => y.Id)                    
+            {
+                x.MapIdProperty(y => y.Id)
                     .SetIdGenerator(new StringObjectIdGenerator());
                 x.MapProperty(y => y.Data)
                     .SetSerializer(new DataObjectSerializer());
@@ -45,9 +45,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                     .SetIdGenerator(new StringObjectIdGenerator());
                 x.MapProperty(y => y.EventName);
                 x.MapProperty(y => y.EventKey);
-                x.MapProperty(y => y.StepId);                
+                x.MapProperty(y => y.StepId);
                 x.MapProperty(y => y.WorkflowId);
-                x.MapProperty(y => y.SubscribeAsOf);                
+                x.MapProperty(y => y.SubscribeAsOf);
             });
 
             BsonClassMap.RegisterClassMap<Event>(x =>
@@ -110,7 +110,18 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             var result = await WorkflowInstances.FindAsync(x => x.Id == Id);
             return await result.FirstAsync();
         }
-        
+
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+        {
+            if (ids == null)
+            {
+                return new List<WorkflowInstance>();
+            }
+
+            var result = await WorkflowInstances.FindAsync(x => ids.Contains(x.Id));
+            return await result.ToListAsync();
+        }
+
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
             IQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
@@ -135,7 +146,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await EventSubscriptions.InsertOneAsync(subscription);
             return subscription.Id;
         }
-        
+
         public async Task TerminateSubscription(string eventSubscriptionId)
         {
             await EventSubscriptions.DeleteOneAsync(x => x.Id == eventSubscriptionId);
@@ -143,9 +154,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public void EnsureStoreExists()
         {
-            
-        }                
-                
+
+        }
+
         public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
             var query = EventSubscriptions
@@ -189,7 +200,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             var query = Events
                 .Find(x => x.EventName == eventName && x.EventKey == eventKey && x.EventTime >= asOf)
                 .Project(x => x.Id);
-            
+
             return await query.ToListAsync();
         }
 
