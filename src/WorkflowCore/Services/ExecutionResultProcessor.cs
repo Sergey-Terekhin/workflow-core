@@ -73,7 +73,8 @@ namespace WorkflowCore.Services
                     StepId = step.Id,
                     WorkflowInstanceId = workflow.Id,
                     WorkflowDefinitionId = workflow.WorkflowDefinitionId,
-                    Version = workflow.Version
+                    Version = workflow.Version,
+                    StepExternalId = step.ExternalId
                 });
             }
             else
