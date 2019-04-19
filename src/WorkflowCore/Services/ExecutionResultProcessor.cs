@@ -54,6 +54,24 @@ namespace WorkflowCore.Services
                 });
             }
 
+            if (result.EventsNames != null)
+            {
+                pointer.EventKey = result.EventKey;
+                pointer.Active = false;
+                pointer.Status = PointerStatus.WaitingForEvent;
+                foreach (var resultEventsName in result.EventsNames)
+                {
+                    workflowResult.Subscriptions.Add(new EventSubscription()
+                    {
+                        WorkflowId = workflow.Id,
+                        StepId = pointer.StepId,
+                        EventName = resultEventsName,
+                        EventKey = pointer.EventKey,
+                        SubscribeAsOf = result.EventAsOf
+                    });
+                }
+            }
+
             if (result.Proceed)
             {
                 pointer.Active = false;

@@ -14,7 +14,7 @@ namespace WorkflowCore.Models
         public object PersistenceData { get; set; }
 
         public string EventName { get; set; }
-
+        public List<string> EventsNames { get; set; }
         public string EventKey { get; set; }
 
         public DateTime EventAsOf { get; set; }
@@ -84,6 +84,17 @@ namespace WorkflowCore.Models
             {
                 Proceed = false,
                 EventName = eventName,
+                EventKey = eventKey,
+                EventAsOf = effectiveDate.ToUniversalTime()
+            };
+        }
+
+        public static ExecutionResult WaitForMultipleEvents(List<string> eventsNames, string eventKey, DateTime effectiveDate)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                EventsNames = eventsNames,
                 EventKey = eventKey,
                 EventAsOf = effectiveDate.ToUniversalTime()
             };
