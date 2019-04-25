@@ -30,7 +30,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 subscription.Id = Guid.NewGuid().ToString();
                 var persistable = subscription.ToPersistable();
                 var result = db.Set<PersistedSubscription>().Add(persistable);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return subscription.Id;
             }
         }
@@ -42,7 +42,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 workflow.Id = Guid.NewGuid().ToString();
                 var persistable = workflow.ToPersistable();
                 var result = db.Set<PersistedWorkflow>().Add(persistable);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return workflow.Id;
             }
         }
@@ -52,10 +52,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var now = asAt.ToUniversalTime().Ticks;
-                var raw = await db.Set<PersistedWorkflow>()
+                var raw = db.Set<PersistedWorkflow>()
                     .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
                     .Select(x => x.InstanceId)
-                    .ToListAsync();
+                    .ToList();
 
                 return raw.Select(s => s.ToString()).ToList();
             }
@@ -83,7 +83,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (createdTo.HasValue)
                     query = query.Where(x => x.CreateTime <= createdTo.Value);
 
-                var rawResult = await query.Skip(skip).Take(take).ToListAsync();
+                var rawResult = query.Skip(skip).Take(take).ToList();
                 List<WorkflowInstance> result = new List<WorkflowInstance>();
 
                 foreach (var item in rawResult)
@@ -98,11 +98,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(Id);
-                var raw = await db.Set<PersistedWorkflow>()
+                var raw = db.Set<PersistedWorkflow>()
                     .Include(wf => wf.ExecutionPointers)
                     .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
-                    .FirstAsync(x => x.InstanceId == uid);
+                    .First(x => x.InstanceId == uid);
 
                 if (raw == null)
                     return null;
@@ -127,7 +127,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                     .Where(x => uids.Contains(x.InstanceId));
 
-                return (await raw.ToListAsync()).Select(i => i.ToWorkflowInstance());
+                return (raw.ToList()).Select(i => i.ToWorkflowInstance());
             }
         }
 
@@ -136,16 +136,16 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(workflow.Id);
-                var existingEntity = await db.Set<PersistedWorkflow>()
+                var existingEntity = db.Set<PersistedWorkflow>()
                     .Where(x => x.InstanceId == uid)
                     .Include(wf => wf.ExecutionPointers)
                     .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
                     .AsTracking()
-                    .FirstAsync();
+                    .First();
 
                 var persistable = workflow.ToPersistable(existingEntity);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
         }
 
@@ -154,9 +154,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(eventSubscriptionId);
-                var existing = await db.Set<PersistedSubscription>().FirstAsync(x => x.SubscriptionId == uid);
+                var existing = db.Set<PersistedSubscription>().First(x => x.SubscriptionId == uid);
                 db.Set<PersistedSubscription>().Remove(existing);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
         }
 
@@ -183,10 +183,14 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 asOf = asOf.ToUniversalTime();
-                var raw = await db.Set<PersistedSubscription>()
-                    .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf)
-                    .ToListAsync();
+                var querry = db.Set<PersistedSubscription>()
+                    .Where(x => x.EventKey == eventKey && x.SubscribeAsOf <= asOf).AsQueryable();
+                if (!string.IsNullOrEmpty(eventName))
+                {
+                    querry = querry.Where(x => x.EventName == eventName);
+                }
 
+                var raw = querry.ToList();
                 return raw.Select(item => item.ToEventSubscription()).ToList();
             }
         }
@@ -198,7 +202,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 newEvent.Id = Guid.NewGuid().ToString();
                 var persistable = newEvent.ToPersistable();
                 var result = db.Set<PersistedEvent>().Add(persistable);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return newEvent.Id;
             }
         }
@@ -208,8 +212,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 Guid uid = new Guid(id);
-                var raw = await db.Set<PersistedEvent>()
-                    .FirstAsync(x => x.EventId == uid);
+                var raw = db.Set<PersistedEvent>()
+                    .First(x => x.EventId == uid);
 
                 if (raw == null)
                     return null;
@@ -224,11 +228,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 asAt = asAt.ToUniversalTime();
-                var raw = await db.Set<PersistedEvent>()
+                var raw = db.Set<PersistedEvent>()
                     .Where(x => !x.IsProcessed)
                     .Where(x => x.EventTime <= now)
                     .Select(x => x.EventId)
-                    .ToListAsync();
+                    .ToList();
 
                 return raw.Select(s => s.ToString()).ToList();
             }
@@ -239,13 +243,13 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(id);
-                var existingEntity = await db.Set<PersistedEvent>()
+                var existingEntity = db.Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .FirstAsync();
+                    .First();
 
                 existingEntity.IsProcessed = true;
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
         }
 
@@ -253,11 +257,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         {
             using (var db = ConstructDbContext())
             {
-                var raw = await db.Set<PersistedEvent>()
+                var raw = db.Set<PersistedEvent>()
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey)
                     .Where(x => x.EventTime >= asOf)
                     .Select(x => x.EventId)
-                    .ToListAsync();
+                    .ToList();
 
                 var result = new List<string>();
 
@@ -273,13 +277,13 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(id);
-                var existingEntity = await db.Set<PersistedEvent>()
+                var existingEntity = db.Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .FirstAsync();
+                    .First();
 
                 existingEntity.IsProcessed = false;
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
         }
 
@@ -294,7 +298,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     {
                         db.Set<PersistedExecutionError>().Add(error.ToPersistable());
                     }
-                    await db.SaveChangesAsync();
+                    db.SaveChanges();
 
                 }
             }
