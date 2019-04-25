@@ -95,7 +95,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
                 workflow.NextExecution = 0;
                 await _persistenceStore.PersistWorkflow(workflow);
-                await _persistenceStore.TerminateSubscription(sub.Id);
+                //await _persistenceStore.TerminateSubscription(sub.Id);
                 return true;
             }
             catch (Exception ex)
