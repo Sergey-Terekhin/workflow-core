@@ -86,7 +86,12 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 var workflow = await _persistenceStore.GetWorkflowInstance(sub.WorkflowId);
-                var pointers = workflow.ExecutionPointers.Where(p => p.EventKey == sub.EventKey && !p.EventPublished && p.EndTime == null);
+                var pointers = workflow.ExecutionPointers.Where(p => p.EventKey == sub.EventKey && p.EndTime == null).ToList();
+                if (pointers.Any(x => x.EventPublished))
+                {
+                    return false;
+                }
+
                 foreach (var p in pointers)
                 {
                     p.EventData = evt.EventData;
