@@ -1,27 +1,31 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
+using WorkflowCore.Persistence.EntityFramework;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
     public partial class Events : Migration
     {
+        private readonly string _schema = MigrationMetaInfo.DbSchema;
+        private readonly string _tablePrefix = MigrationMetaInfo.TableNamePrefix;
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UnpublishedEvent",
-                schema: "wfc");
+                name: _tablePrefix + "UnpublishedEvent",
+                schema: _schema);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "SubscribeAsOf",
-                schema: "wfc",
-                table: "Subscription",
+                schema: _schema,
+                table: _tablePrefix + "Subscription",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.CreateTable(
-                name: "Event",
-                schema: "wfc",
+                name: _tablePrefix + "Event",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -40,44 +44,44 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Event_EventId",
-                schema: "wfc",
-                table: "Event",
+                schema: _schema,
+                table: _tablePrefix + "Event",
                 column: "EventId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Event_EventTime",
-                schema: "wfc",
-                table: "Event",
+                schema: _schema,
+                table: _tablePrefix + "Event",
                 column: "EventTime");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Event_IsProcessed",
-                schema: "wfc",
-                table: "Event",
+                schema: _schema,
+                table: _tablePrefix + "Event",
                 column: "IsProcessed");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Event_EventName_EventKey",
-                schema: "wfc",
-                table: "Event",
+                schema: _schema,
+                table: _tablePrefix + "Event",
                 columns: new[] { "EventName", "EventKey" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Event",
-                schema: "wfc");
+                name: _tablePrefix + "Event",
+                schema: _schema);
 
             migrationBuilder.DropColumn(
                 name: "SubscribeAsOf",
-                schema: "wfc",
-                table: "Subscription");
+                schema: _schema,
+                table: _tablePrefix + "Subscription");
 
             migrationBuilder.CreateTable(
-                name: "UnpublishedEvent",
-                schema: "wfc",
+                name: _tablePrefix + "UnpublishedEvent",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -96,8 +100,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_UnpublishedEvent_PublicationId",
-                schema: "wfc",
-                table: "UnpublishedEvent",
+                schema: _schema,
+                table: _tablePrefix + "UnpublishedEvent",
                 column: "PublicationId",
                 unique: true);
         }

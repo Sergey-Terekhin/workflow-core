@@ -51,9 +51,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedEvent");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("SqlServer:Schema", _schema);
 
-                    b.HasAnnotation("SqlServer:TableName", "Event");
+                    b.HasAnnotation("SqlServer:TableName", _tablePrefix + "Event");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
@@ -77,9 +77,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedExecutionError");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("SqlServer:Schema", _schema);
 
-                    b.HasAnnotation("SqlServer:TableName", "ExecutionError");
+                    b.HasAnnotation("SqlServer:TableName", _tablePrefix + "ExecutionError");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
@@ -125,9 +125,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedExecutionPointer");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("SqlServer:Schema", _schema);
 
-                    b.HasAnnotation("SqlServer:TableName", "ExecutionPointer");
+                    b.HasAnnotation("SqlServer:TableName", _tablePrefix + "ExecutionPointer");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
@@ -149,9 +149,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedExtensionAttribute");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("SqlServer:Schema", _schema);
 
-                    b.HasAnnotation("SqlServer:TableName", "ExtensionAttribute");
+                    b.HasAnnotation("SqlServer:TableName", _tablePrefix + "ExtensionAttribute");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
@@ -187,9 +187,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedSubscription");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("SqlServer:Schema", _schema);
 
-                    b.HasAnnotation("SqlServer:TableName", "Subscription");
+                    b.HasAnnotation("SqlServer:TableName", _tablePrefix + "Subscription");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
@@ -228,14 +228,14 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedWorkflow");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("SqlServer:Schema", _schema);
 
-                    b.HasAnnotation("SqlServer:TableName", "Workflow");
+                    b.HasAnnotation("SqlServer:TableName", _tablePrefix + "Workflow");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
                 {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", _tablePrefix + "ExecutionPointer")
                         .WithMany("Errors")
                         .HasForeignKey("ExecutionPointerId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -243,7 +243,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
                 {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", "Workflow")
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", _tablePrefix + "Workflow")
                         .WithMany("ExecutionPointers")
                         .HasForeignKey("WorkflowId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -251,7 +251,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
                 {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", _tablePrefix + "ExecutionPointer")
                         .WithMany("ExtensionAttributes")
                         .HasForeignKey("ExecutionPointerId")
                         .OnDelete(DeleteBehavior.Cascade);

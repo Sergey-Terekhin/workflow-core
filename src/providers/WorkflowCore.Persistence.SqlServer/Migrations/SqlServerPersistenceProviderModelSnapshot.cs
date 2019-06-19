@@ -3,12 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
+using WorkflowCore.Persistence.EntityFramework;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
     [DbContext(typeof(SqlServerContext))]
     partial class SqlServerPersistenceProviderModelSnapshot : ModelSnapshot
     {
+        private readonly string _schema = MigrationMetaInfo.DbSchema;
+        private readonly string _tablePrefix = MigrationMetaInfo.TableNamePrefix;
+
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -47,7 +51,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.HasIndex("EventName", "EventKey");
 
-                    b.ToTable("Event","wfc");
+                    b.ToTable(_tablePrefix + "Event",_schema);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
@@ -68,7 +72,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.HasKey("PersistenceId");
 
-                    b.ToTable("ExecutionError","wfc");
+                    b.ToTable(_tablePrefix + "ExecutionError",_schema);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
@@ -126,7 +130,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.HasIndex("WorkflowId");
 
-                    b.ToTable("ExecutionPointer","wfc");
+                    b.ToTable(_tablePrefix + "ExecutionPointer",_schema);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
@@ -146,7 +150,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.HasIndex("ExecutionPointerId");
 
-                    b.ToTable("ExtensionAttribute","wfc");
+                    b.ToTable(_tablePrefix + "ExtensionAttribute",_schema);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
@@ -180,7 +184,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.HasIndex("SubscriptionId")
                         .IsUnique();
 
-                    b.ToTable("Subscription","wfc");
+                    b.ToTable(_tablePrefix + "Subscription",_schema);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
@@ -220,12 +224,12 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.HasIndex("NextExecution");
 
-                    b.ToTable("Workflow","wfc");
+                    b.ToTable(_tablePrefix + "Workflow",_schema);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
                 {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", "Workflow")
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", _tablePrefix + "Workflow")
                         .WithMany("ExecutionPointers")
                         .HasForeignKey("WorkflowId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -233,7 +237,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
                 {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", _tablePrefix + "ExecutionPointer")
                         .WithMany("ExtensionAttributes")
                         .HasForeignKey("ExecutionPointerId")
                         .OnDelete(DeleteBehavior.Cascade);

@@ -7,7 +7,7 @@ namespace WorkflowCore.Persistence.SqlServer
     {
         public SqlServerContext CreateDbContext(string[] args)
         {
-            return new SqlServerContext(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;");
+            return new SqlServerContext(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;", "public", "");
         }
     }
 }
