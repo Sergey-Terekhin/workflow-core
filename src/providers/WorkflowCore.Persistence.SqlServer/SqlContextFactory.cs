@@ -1,4 +1,5 @@
 ﻿using System;
+using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
@@ -15,7 +16,8 @@ namespace WorkflowCore.Persistence.SqlServer
 
         public WorkflowDbContext Build()
         {
-            return new SqlServerContext(_connectionString);
+            return new SqlServerContext(_connectionString, MigrationMetaInfo.DbSchema,
+                MigrationMetaInfo.TableNamePrefix);
         }
     }
 }

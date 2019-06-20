@@ -1,19 +1,23 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
+using WorkflowCore.Persistence.EntityFramework;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
     public partial class InitialDatabase : Migration
     {
+        private readonly string _schema = MigrationMetaInfo.DbSchema;
+        private readonly string _tablePrefix = MigrationMetaInfo.TableNamePrefix;
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "wfc");
+                name: _schema);
 
             migrationBuilder.CreateTable(
-                name: "UnpublishedEvent",
-                schema: "wfc",
+                name: _tablePrefix + "UnpublishedEvent",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -31,8 +35,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Subscription",
-                schema: "wfc",
+                name: _tablePrefix + "Subscription",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -49,8 +53,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Workflow",
-                schema: "wfc",
+                name: _tablePrefix + "Workflow",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -71,8 +75,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExecutionPointer",
-                schema: "wfc",
+                name: _tablePrefix + "ExecutionPointer",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -99,15 +103,15 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     table.ForeignKey(
                         name: "FK_ExecutionPointer_Workflow_WorkflowId",
                         column: x => x.WorkflowId,
-                        principalSchema: "wfc",
-                        principalTable: "Workflow",
+                        principalSchema: _schema,
+                        principalTable: _tablePrefix + "Workflow",
                         principalColumn: "PersistenceId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExecutionError",
-                schema: "wfc",
+                name: _tablePrefix + "ExecutionError",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -123,15 +127,15 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     table.ForeignKey(
                         name: "FK_ExecutionError_ExecutionPointer_ExecutionPointerId",
                         column: x => x.ExecutionPointerId,
-                        principalSchema: "wfc",
-                        principalTable: "ExecutionPointer",
+                        principalSchema: _schema,
+                        principalTable: _tablePrefix + "ExecutionPointer",
                         principalColumn: "PersistenceId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExtensionAttribute",
-                schema: "wfc",
+                name: _tablePrefix + "ExtensionAttribute",
+                schema: _schema,
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
@@ -146,95 +150,95 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     table.ForeignKey(
                         name: "FK_ExtensionAttribute_ExecutionPointer_ExecutionPointerId",
                         column: x => x.ExecutionPointerId,
-                        principalSchema: "wfc",
-                        principalTable: "ExecutionPointer",
+                        principalSchema: _schema,
+                        principalTable: _tablePrefix + "ExecutionPointer",
                         principalColumn: "PersistenceId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExecutionError_ExecutionPointerId",
-                schema: "wfc",
-                table: "ExecutionError",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionError",
                 column: "ExecutionPointerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExecutionPointer_WorkflowId",
-                schema: "wfc",
-                table: "ExecutionPointer",
+                schema: _schema,
+                table: _tablePrefix + "ExecutionPointer",
                 column: "WorkflowId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExtensionAttribute_ExecutionPointerId",
-                schema: "wfc",
-                table: "ExtensionAttribute",
+                schema: _schema,
+                table: _tablePrefix + "ExtensionAttribute",
                 column: "ExecutionPointerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UnpublishedEvent_PublicationId",
-                schema: "wfc",
-                table: "UnpublishedEvent",
+                schema: _schema,
+                table: _tablePrefix + "UnpublishedEvent",
                 column: "PublicationId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subscription_EventKey",
-                schema: "wfc",
-                table: "Subscription",
+                schema: _schema,
+                table: _tablePrefix + "Subscription",
                 column: "EventKey");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subscription_EventName",
-                schema: "wfc",
-                table: "Subscription",
+                schema: _schema,
+                table: _tablePrefix + "Subscription",
                 column: "EventName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subscription_SubscriptionId",
-                schema: "wfc",
-                table: "Subscription",
+                schema: _schema,
+                table: _tablePrefix + "Subscription",
                 column: "SubscriptionId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workflow_InstanceId",
-                schema: "wfc",
-                table: "Workflow",
+                schema: _schema,
+                table: _tablePrefix + "Workflow",
                 column: "InstanceId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workflow_NextExecution",
-                schema: "wfc",
-                table: "Workflow",
+                schema: _schema,
+                table: _tablePrefix + "Workflow",
                 column: "NextExecution");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ExecutionError",
-                schema: "wfc");
+                name: _tablePrefix + "ExecutionError",
+                schema: _schema);
 
             migrationBuilder.DropTable(
-                name: "ExtensionAttribute",
-                schema: "wfc");
+                name: _tablePrefix + "ExtensionAttribute",
+                schema: _schema);
 
             migrationBuilder.DropTable(
-                name: "UnpublishedEvent",
-                schema: "wfc");
+                name: _tablePrefix + "UnpublishedEvent",
+                schema: _schema);
 
             migrationBuilder.DropTable(
-                name: "Subscription",
-                schema: "wfc");
+                name: _tablePrefix + "Subscription",
+                schema: _schema);
 
             migrationBuilder.DropTable(
-                name: "ExecutionPointer",
-                schema: "wfc");
+                name: _tablePrefix + "ExecutionPointer",
+                schema: _schema);
 
             migrationBuilder.DropTable(
-                name: "Workflow",
-                schema: "wfc");
+                name: _tablePrefix + "Workflow",
+                schema: _schema);
         }
     }
 }
