@@ -16,9 +16,9 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Provides support to persist workflows running on Workflow Core to a PostgreSQL database.</Description>
-    <Version>1.9.1.1</Version>
-    <AssemblyVersion>1.9.1.1</AssemblyVersion>
-    <FileVersion>1.9.1.1</FileVersion>
+    <Version>1.9.1.2</Version>
+    <AssemblyVersion>1.9.1.2</AssemblyVersion>
+    <FileVersion>1.9.1.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

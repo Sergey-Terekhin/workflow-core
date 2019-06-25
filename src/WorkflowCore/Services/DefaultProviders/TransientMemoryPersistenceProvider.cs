@@ -27,6 +27,10 @@ namespace WorkflowCore.Services
         public Task<Event> GetEvent(string id) => _innerService.GetEvent(id);
 
         public Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf) => _innerService.GetEvents(eventName, eventKey, asOf);
+        public Task RemoveEventsByKey(string eventKey)
+        {
+            return Task.CompletedTask;
+        }
 
         public Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt) => _innerService.GetRunnableEvents(asAt);
 

@@ -147,6 +147,11 @@ namespace WorkflowCore.Services
             }
         }
 
+        public Task RemoveEventsByKey(string eventKey)
+        {
+            return Task.CompletedTask;
+        }
+
         public async Task MarkEventProcessed(string id)
         {
             lock (_events)

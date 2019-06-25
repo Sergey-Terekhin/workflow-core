@@ -287,6 +287,20 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
+        public async Task RemoveEventsByKey(string eventKey)
+        {
+            using (var db=ConstructDbContext())
+            {
+                var rowsToDelete = db.Set<PersistedEvent>().Where(x => x.EventKey == eventKey);
+                if (rowsToDelete.Any())
+                {
+                    db.Set<PersistedEvent>().RemoveRange(rowsToDelete);
+                }
+
+                db.SaveChanges();
+            }
+        }
+
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             using (var db = ConstructDbContext())

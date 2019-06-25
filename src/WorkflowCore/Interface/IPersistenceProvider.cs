@@ -18,7 +18,8 @@ namespace WorkflowCore.Interface
         Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt);
 
         [Obsolete]
-        Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take);
+        Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip,
+            int take);
 
         Task<WorkflowInstance> GetWorkflowInstance(string Id);
 
@@ -37,6 +38,7 @@ namespace WorkflowCore.Interface
         Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt);
 
         Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf);
+        Task RemoveEventsByKey(string eventKey);
 
         Task MarkEventProcessed(string id);
 
@@ -45,6 +47,5 @@ namespace WorkflowCore.Interface
         Task PersistErrors(IEnumerable<ExecutionError> errors);
 
         void EnsureStoreExists();
-
     }
 }
