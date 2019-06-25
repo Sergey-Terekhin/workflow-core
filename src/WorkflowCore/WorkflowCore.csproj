@@ -15,9 +15,9 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
-    <Version>1.9.3.4</Version>
-    <AssemblyVersion>1.9.3.4</AssemblyVersion>
-    <FileVersion>1.9.3.2</FileVersion>
+    <Version>1.9.3.5</Version>
+    <AssemblyVersion>1.9.3.5</AssemblyVersion>
+    <FileVersion>1.9.3.5</FileVersion>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/avanpostid/workflow-core/master/src/logo.png</PackageIconUrl>
   </PropertyGroup>
