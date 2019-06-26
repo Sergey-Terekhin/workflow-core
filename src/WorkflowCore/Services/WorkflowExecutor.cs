@@ -209,7 +209,7 @@ namespace WorkflowCore.Services
             //TODO: move to own class
             workflow.NextExecution = null;
 
-            if (workflow.Status == WorkflowStatus.Complete)
+            if (workflow.Status == WorkflowStatus.Complete || workflow.Status == WorkflowStatus.Terminated)
                 return;
 
             foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
