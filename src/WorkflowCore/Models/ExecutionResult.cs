@@ -6,7 +6,7 @@ namespace WorkflowCore.Models
     public class ExecutionResult
     {
         public bool Proceed { get; set; }
-
+        public bool Terminated { get; set; }
         public object OutcomeValue { get; set; }
 
         public TimeSpan? SleepFor { get; set; }
@@ -97,6 +97,14 @@ namespace WorkflowCore.Models
                 EventsNames = eventsNames,
                 EventKey = eventKey,
                 EventAsOf = effectiveDate.ToUniversalTime()
+            };
+        }
+
+        public static ExecutionResult Terminate()
+        {
+            return new ExecutionResult()
+            {
+                Terminated = true
             };
         }
     }

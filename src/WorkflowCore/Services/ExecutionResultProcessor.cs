@@ -29,6 +29,12 @@ namespace WorkflowCore.Services
 
         public void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
         {
+            if (result.Terminated)
+            {
+                workflow.Status = WorkflowStatus.Terminated;
+                return;
+            }
+
             pointer.PersistenceData = result.PersistenceData;
             pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
