@@ -193,6 +193,7 @@ namespace WorkflowCore.Services
             {
                 var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
                 wf.Status = WorkflowStatus.Terminated;
+                wf.CompleteTime = DateTime.UtcNow;
                 await _persistenceStore.PersistWorkflow(wf);
                 await _queueProvider.QueueWork(workflowId, QueueType.Index);
                 await _eventHub.PublishNotification(new WorkflowTerminated()
