@@ -327,6 +327,11 @@ namespace WorkflowCore.Providers.AWS.Services
             return result;
         }
 
+        public Task RemoveEventsByKey(string eventKey)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task MarkEventProcessed(string id)
         {
             var request = new UpdateItemRequest()

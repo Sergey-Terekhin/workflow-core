@@ -243,10 +243,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(id);
-                var existingEntity = db.Set<PersistedEvent>()
+                var existingEntity = await db.Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .First();
+                    .FirstAsync();
 
                 existingEntity.IsProcessed = true;
                 db.SaveChanges();
@@ -289,7 +289,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
         public async Task RemoveEventsByKey(string eventKey)
         {
-            using (var db=ConstructDbContext())
+            using (var db = ConstructDbContext())
             {
                 var rowsToDelete = db.Set<PersistedEvent>().Where(x => x.EventKey == eventKey);
                 if (rowsToDelete.Any())

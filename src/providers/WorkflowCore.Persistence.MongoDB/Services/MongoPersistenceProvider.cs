@@ -187,6 +187,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await query.ToListAsync();
         }
 
+        public Task RemoveEventsByKey(string eventKey)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task MarkEventProcessed(string id)
         {
             var update = Builders<Event>.Update

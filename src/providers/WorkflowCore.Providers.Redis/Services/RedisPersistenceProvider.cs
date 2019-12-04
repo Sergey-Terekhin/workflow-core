@@ -163,6 +163,11 @@ namespace WorkflowCore.Providers.Redis.Services
             return result;
         }
 
+        public Task RemoveEventsByKey(string eventKey)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task MarkEventProcessed(string id)
         {
             var evt = await GetEvent(id);
