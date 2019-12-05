@@ -64,7 +64,11 @@ namespace WorkflowCore.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(default(EventId), ex, ex.Message);
+                    _logger.LogError(
+                        WellKnownLoggingEventIds.EventFailedToPublishLifecycleEvent,
+                        ex,
+                        "Failed to publish lifecycle event {Event} ({WorkflowInstance} {Reference})",
+                        evt.GetType(), evt.WorkflowInstanceId, evt.Reference);
                 }
             }
         }

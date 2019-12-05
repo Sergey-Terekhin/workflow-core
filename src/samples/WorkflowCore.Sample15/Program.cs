@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Sample15.Steps;
 using WorkflowCore.Sample15.Services;
@@ -27,9 +28,9 @@ namespace WorkflowCore.Sample15
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
+            services.AddLogging(c => c.AddDebug().AddFilter(l => true));
             services.AddWorkflow();
-            
+
             services.AddTransient<DoSomething>();
             services.AddTransient<IMyService, MyService>();
 

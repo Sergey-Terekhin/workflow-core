@@ -19,7 +19,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
-            _queueProvider = queueProvider;            
+            _queueProvider = queueProvider;
             _logger = loggerFactory.CreateLogger<RunnablePoller>();
             _lockProvider = lockProvider;
             _options = options;
@@ -27,7 +27,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         public void Start()
         {
-            _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.PollInterval);
+            _pollTimer = new Timer(PollRunnables, null, TimeSpan.FromSeconds(0), _options.PollInterval);
         }
 
         public void Stop()
@@ -47,52 +47,67 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             try
             {
-                if (await _lockProvider.AcquireLock("poll runnables", new CancellationToken()))
+                const string pollRunnablesLock = "poll_runnables";
+                if (await _lockProvider.AcquireLock(pollRunnablesLock, new CancellationToken()))
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for runnable workflows");                        
+                        _logger.LogDebug(WellKnownLoggingEventIds.WorkflowPollingRunnable,
+                            "Polling for runnable workflows");
+
                         var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
                         foreach (var item in runnables)
                         {
-                            _logger.LogDebug("Got runnable instance {0}", item);
+                            _logger.LogDebug(WellKnownLoggingEventIds.WorkflowFoundRunnable, 
+                                "Got runnable instance {WorkflowId}",
+                                item);
                             await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
                     finally
                     {
-                        await _lockProvider.ReleaseLock("poll runnables");
+                        await _lockProvider.ReleaseLock(pollRunnablesLock);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(
+                    WellKnownLoggingEventIds.WorkflowFailedToPollRunnable,
+                    ex,
+                    "Failed to poll runnable workflows");
             }
 
             try
             {
-                if (await _lockProvider.AcquireLock("unprocessed events", new CancellationToken()))
+                const string unprocessedEventsLock = "unprocessed_events";
+                if (await _lockProvider.AcquireLock(unprocessedEventsLock, new CancellationToken()))
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for unprocessed events");                        
+                        _logger.LogDebug(WellKnownLoggingEventIds.EventPollingUnprocessed, "Polling for unprocessed events");
                         var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
                         foreach (var item in events.ToList())
                         {
-                            _logger.LogDebug($"Got unprocessed event {item}");
-                            await _queueProvider.QueueWork(item, QueueType.Event);                            
+                            _logger.LogDebug(WellKnownLoggingEventIds.EventFoundUnprocessed, 
+                                "Got unprocessed event {EventId}", 
+                                item);
+
+                            await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }
                     finally
                     {
-                        await _lockProvider.ReleaseLock("unprocessed events");
+                        await _lockProvider.ReleaseLock(unprocessedEventsLock);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(
+                    WellKnownLoggingEventIds.EventFailedToGetUnprocessed,
+                    ex,
+                    "Failed to get unprocessed event");
             }
         }
     }

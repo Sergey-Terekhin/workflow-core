@@ -95,18 +95,20 @@ namespace WorkflowCore.Services
 
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
-            _logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
-            Event evt = new Event();
+            _logger.LogDebug(
+                WellKnownLoggingEventIds.EventCreateNew ,
+                "Creating event {EventName} {EventKey}",
+                eventName, eventKey);
 
-            if (effectiveDate.HasValue)
-                evt.EventTime = effectiveDate.Value.ToUniversalTime();
-            else
-                evt.EventTime = DateTime.Now.ToUniversalTime();
-
-            evt.EventData = eventData;
-            evt.EventKey = eventKey;
-            evt.EventName = eventName;
-            evt.IsProcessed = false;
+            var evt = new Event
+            {
+                EventTime = effectiveDate?.ToUniversalTime() ?? DateTime.Now.ToUniversalTime(),
+                EventData = eventData,
+                EventKey = eventKey,
+                EventName = eventName,
+                IsProcessed = false
+            };
+            
             string eventId = await _persistenceStore.CreateEvent(evt);
 
             await _queueProvider.QueueWork(eventId, QueueType.Event);

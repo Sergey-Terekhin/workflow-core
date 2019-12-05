@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using System.Reflection;
-using WorkflowCore.Exceptions;
 using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
@@ -15,7 +12,6 @@ namespace WorkflowCore.Services
     public class WorkflowHost : IWorkflowHost, IDisposable
     {
         protected bool _shutdown = true;
-        protected readonly IServiceProvider _serviceProvider;
 
         private readonly IEnumerable<IBackgroundTask> _backgroundTasks;
         private readonly IWorkflowController _workflowController;
@@ -24,23 +20,32 @@ namespace WorkflowCore.Services
         public event LifeCycleEventHandler OnLifeCycleEvent;
 
         // Public dependencies to allow for extension method access.
-        public IPersistenceProvider PersistenceStore { get; private set; }
-        public IDistributedLockProvider LockProvider { get; private set; }
-        public IWorkflowRegistry Registry { get; private set; }
-        public WorkflowOptions Options { get; private set; }
-        public IQueueProvider QueueProvider { get; private set; }
-        public ILogger Logger { get; private set; }
+        public IPersistenceProvider PersistenceStore { get; }
+        public IDistributedLockProvider LockProvider { get; }
+        public IWorkflowRegistry Registry { get; }
+        public WorkflowOptions Options { get; }
+        public IQueueProvider QueueProvider { get; }
+        public ILogger Logger { get; }
 
         private readonly ILifeCycleEventHub _lifeCycleEventHub;
         private readonly ISearchIndex _searchIndex;
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub, ISearchIndex searchIndex)
+        public WorkflowHost(
+            IPersistenceProvider persistenceStore,
+            IQueueProvider queueProvider, 
+            WorkflowOptions options,
+            ILoggerFactory loggerFactory,
+            IWorkflowRegistry registry,
+            IDistributedLockProvider lockProvider, 
+            IEnumerable<IBackgroundTask> backgroundTasks,
+            IWorkflowController workflowController, 
+            ILifeCycleEventHub lifeCycleEventHub, 
+            ISearchIndex searchIndex)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
             Options = options;
             Logger = loggerFactory.CreateLogger<WorkflowHost>();
-            _serviceProvider = serviceProvider;
             Registry = registry;
             LockProvider = lockProvider;
             _backgroundTasks = backgroundTasks;
@@ -86,21 +91,27 @@ namespace WorkflowCore.Services
             _lifeCycleEventHub.Start().Wait();
             _searchIndex.Start().Wait();
             
-            Logger.LogInformation("Starting backgroud tasks");
+            Logger.LogInformation(WellKnownLoggingEventIds.BackgroundTaskStart, "Starting background tasks");
 
             foreach (var task in _backgroundTasks)
+            {
+                Logger.LogInformation(WellKnownLoggingEventIds.BackgroundTaskStart, "Starting task {Task}", task.GetType());
                 task.Start();
+            }
         }
 
         public void Stop()
         {
             _shutdown = true;
 
-            Logger.LogInformation("Stopping background tasks");
+            Logger.LogInformation(WellKnownLoggingEventIds.BackgroundTaskStopping, "Stopping background tasks");
             foreach (var th in _backgroundTasks)
+            {
+                Logger.LogInformation(WellKnownLoggingEventIds.BackgroundTaskStopping, "Stopping task {Task}", th.GetType());
                 th.Stop();
+            }
 
-            Logger.LogInformation("Worker tasks stopped");
+            Logger.LogInformation(WellKnownLoggingEventIds.BackgroundTaskStopped, "Worker tasks stopped");
 
             QueueProvider.Stop().Wait();
             LockProvider.Stop().Wait();

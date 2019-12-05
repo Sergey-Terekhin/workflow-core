@@ -31,10 +31,10 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             if (!await _lockProvider.AcquireLock(itemId, cancellationToken))
             {
-                Logger.LogInformation("Workflow locked {0}", itemId);
+                Logger.LogInformation(WellKnownLoggingEventIds.FailedToAcquireLock, "Workflow already locked: {WorkflowId}", itemId);
                 return;
             }
-            
+
             WorkflowInstance workflow = null;
             WorkflowExecutorResult result = null;
             var persistenceStore = _persistenceStorePool.Get();
@@ -75,7 +75,9 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
                         {
-                            new Task(() => FutureQueue(workflow, cancellationToken)).Start();
+#pragma warning disable 4014
+                            FutureQueue(workflow, cancellationToken);
+#pragma warning restore 4014
                         }
                     }
                 }
@@ -85,12 +87,17 @@ namespace WorkflowCore.Services.BackgroundTasks
                 _persistenceStorePool.Return(persistenceStore);
             }
         }
-        
+
         private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore)
         {
             //TODO: move to own class
-            Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
-            
+            Logger.LogDebug(WellKnownLoggingEventIds.DebugNewSubscription,
+                "Subscribing to event {EventName} {EventKey} for workflow {WorkflowId} step {StepId}", 
+                subscription.EventName, 
+                subscription.EventKey, 
+                subscription.WorkflowId, 
+                subscription.StepId);
+
             await persistenceStore.CreateEventSubscription(subscription);
             var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf);
             foreach (var evt in events)
@@ -100,7 +107,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
         }
 
-        private async void FutureQueue(WorkflowInstance workflow, CancellationToken cancellationToken)
+        private async Task FutureQueue(WorkflowInstance workflow, CancellationToken cancellationToken)
         {
             try
             {
@@ -119,7 +126,10 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.Message);
+                Logger.LogError(
+                    WellKnownLoggingEventIds.FailedToEnquequeWorkflow,
+                    ex,
+                    "Failed to enqueue workflow {Id}", workflow.Id);
             }
         }
     }

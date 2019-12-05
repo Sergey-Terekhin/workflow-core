@@ -30,7 +30,11 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(default(EventId), ex, $"Error on event subscriber: {ex.Message}");
+                        _logger.LogWarning(
+                            WellKnownLoggingEventIds.EventFailedToProcessLifecycleEventSubscriber,
+                            ex,
+                            "Failed to process event subscriber for lifecycle event {Event} ({WorkflowInstance} {Reference})",
+                            evt.GetType(), evt.WorkflowInstanceId, evt.Reference);
                     }
                 }
             });

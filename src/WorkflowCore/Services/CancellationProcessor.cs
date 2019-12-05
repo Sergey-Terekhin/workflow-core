@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -27,11 +25,15 @@ namespace WorkflowCore.Services
                 var cancel = false;
                 try
                 {
-                    cancel = (bool)(func.DynamicInvoke(workflow.Data));
+                    cancel = (bool)func.DynamicInvoke(workflow.Data);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(default(EventId), ex.Message, ex);
+                    _logger.LogError(
+                        WellKnownLoggingEventIds.WorkflowStepCancelConditionExecutionError,
+                        ex,
+                        "Failed to invoke CancelCondition for step {StepName} ({StepId})",
+                        step.Name, step.Id);
                 }
                 if (cancel)
                 {

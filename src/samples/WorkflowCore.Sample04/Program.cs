@@ -29,7 +29,7 @@ namespace WorkflowCore.Sample04
 
             var initialData = new MyDataClass();
             var workflowId = host.StartWorkflow("EventSampleWorkflow", 1, initialData).Result;
-            
+
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
             host.PublishEvent("MyEvent", workflowId, value);
@@ -42,7 +42,13 @@ namespace WorkflowCore.Sample04
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
+            services.AddLogging(c => c.AddConsole()
+                .AddFilter((cat, level) =>
+                {
+                    if (cat.StartsWith("WorkflowCore"))
+                        return true;
+                    return level >= LogLevel.Information;
+                }));
             services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;", true, true));
@@ -88,9 +94,6 @@ namespace WorkflowCore.Sample04
 
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddDebug(LogLevel.Debug);
             return serviceProvider;
         }
 

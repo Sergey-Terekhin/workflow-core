@@ -17,7 +17,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         protected readonly IQueueProvider QueueProvider;
         protected readonly ILogger Logger;
         protected readonly WorkflowOptions Options;
-        protected Task DispatchTask;        
+        protected Task DispatchTask;
         private CancellationTokenSource _cancellationTokenSource;
 
         protected QueueConsumer(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
@@ -37,7 +37,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
 
             _cancellationTokenSource = new CancellationTokenSource();
-                        
+
             DispatchTask = new Task(Execute, TaskCreationOptions.LongRunning);
             DispatchTask.Start();
         }
@@ -61,7 +61,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     if (activeTasks.Count >= MaxConcurrentItems)
                     {
-                        await Task.Delay(Options.IdleTime);
+                        await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
 
@@ -73,7 +73,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
-                    
+
                     if (activeTasks.ContainsKey(item))
                     {
                         secondPasses.Add(item);
@@ -82,7 +82,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                     secondPasses.Remove(item);
 
-                    var task = new Task(async (object data) =>
+                    var task = new Task(async data =>
                     {
                         try
                         {
@@ -105,7 +105,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     {
                         activeTasks.Add(item, task);
                     }
-                    
+
                     task.Start();
                 }
                 catch (OperationCanceledException)
@@ -113,7 +113,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(ex.Message);
+                    Logger.LogError(
+                        WellKnownLoggingEventIds.FailedToDequeItem,
+                        ex,
+                        "Failed to dequeue element from the queue {Queue}", Queue);
                 }
             }
 
@@ -128,11 +131,17 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (OperationCanceledException)
             {
-                Logger.LogInformation($"Operation cancelled while processing {itemId}");
+                Logger.LogInformation(
+                    WellKnownLoggingEventIds.OperationCancelled,
+                    "Operation cancelled while processing item {ItemId}", itemId);
             }
             catch (Exception ex)
             {
-                Logger.LogError(default(EventId), ex, $"Error executing item {itemId} - {ex.Message}");
+                Logger.LogError(
+                    WellKnownLoggingEventIds.FailedItemProcessing,
+                    ex,
+                    "Item's processing failed for item {ItemId}",
+                    itemId);
             }
         }
     }

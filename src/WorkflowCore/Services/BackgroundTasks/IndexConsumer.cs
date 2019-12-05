@@ -13,7 +13,6 @@ namespace WorkflowCore.Services.BackgroundTasks
     {
         private readonly ISearchIndex _searchIndex;
         private readonly ObjectPool<IPersistenceProvider> _persistenceStorePool;
-        private readonly ILogger _logger;
         private readonly Dictionary<string, int> _errorCounts = new Dictionary<string, int>();
 
         protected override QueueType Queue => QueueType.Index;
@@ -24,7 +23,6 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             _persistenceStorePool = new DefaultObjectPool<IPersistenceProvider>(persistencePoolPolicy);
             _searchIndex = searchIndex;
-            _logger = loggerFactory.CreateLogger(GetType());
         }
 
         protected override async Task ProcessItem(string itemId, CancellationToken cancellationToken)
@@ -40,7 +38,11 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (Exception e)
             {
-                Logger.LogWarning(default(EventId), $"Error indexing workfow - {itemId} - {e.Message}");
+                Logger.LogWarning(
+                    WellKnownLoggingEventIds.FailedToIndexWorkflow,
+                    e,
+                    "Failed to index workflow {WorkflowId}",
+                    itemId);
                 var errCount = 0;
                 lock (_errorCounts)
                 {
@@ -68,7 +70,11 @@ namespace WorkflowCore.Services.BackgroundTasks
                     _errorCounts.Remove(itemId);
                 }
 
-                Logger.LogError(default(EventId), $"Unable to index workfow - {itemId} - {e.Message}");
+                Logger.LogError(
+                    WellKnownLoggingEventIds.FailedToIndexWorkflow,
+                    e,
+                    "Failed to index workflow {WorkflowId}",
+                    itemId);
             }
         }
 

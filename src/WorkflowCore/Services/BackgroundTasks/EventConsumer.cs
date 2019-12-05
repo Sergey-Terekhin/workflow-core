@@ -29,7 +29,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             if (!await _lockProvider.AcquireLock($"evt:{itemId}", cancellationToken))
             {
-                Logger.LogInformation($"Event locked {itemId}");
+                Logger.LogInformation(WellKnownLoggingEventIds.FailedToAcquireLock, "Event already locked: {ItemId}", itemId);
                 return;
             }
             
@@ -79,7 +79,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             if (!await _lockProvider.AcquireLock(sub.WorkflowId, cancellationToken))
             {
-                Logger.LogInformation("Workflow locked {0}", sub.WorkflowId);
+                Logger.LogInformation(WellKnownLoggingEventIds.FailedToAcquireLock, "Workflow already locked: {WorkflowId}", sub.WorkflowId);
                 return false;
             }
             
@@ -104,7 +104,11 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.Message);
+                Logger.LogError(
+                    WellKnownLoggingEventIds.WorkflowFailedToGetOrUpdate, 
+                    ex, 
+                    "Failed to get or update workflow {WorkflowId}", 
+                    sub.WorkflowId);
                 return false;
             }
             finally
