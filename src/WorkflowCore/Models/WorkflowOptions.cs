@@ -12,7 +12,6 @@ namespace WorkflowCore.Models
         internal Func<IServiceProvider, IQueueProvider> QueueFactory;
         internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
         internal Func<IServiceProvider, ILifeCycleEventHub> EventHubFactory;
-        internal Func<IServiceProvider, ISearchIndex> SearchIndexFactory;
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;
@@ -30,7 +29,6 @@ namespace WorkflowCore.Models
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
             LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
             PersistanceFactory = new Func<IServiceProvider, IPersistenceProvider>(sp => new TransientMemoryPersistenceProvider(sp.GetService<ISingletonMemoryProvider>()));
-            SearchIndexFactory = new Func<IServiceProvider, ISearchIndex>(sp => new NullSearchIndex());
             EventHubFactory = new Func<IServiceProvider, ILifeCycleEventHub>(sp => new SingleNodeEventHub(sp.GetService<ILoggerFactory>()));
         }
 
@@ -52,11 +50,6 @@ namespace WorkflowCore.Models
         public void UseEventHub(Func<IServiceProvider, ILifeCycleEventHub> factory)
         {
             EventHubFactory = factory;
-        }
-
-        public void UseSearchIndex(Func<IServiceProvider, ISearchIndex> factory)
-        {
-            SearchIndexFactory = factory;
         }
 
         public void UsePollInterval(TimeSpan interval)

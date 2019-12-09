@@ -1,18 +1,19 @@
 ﻿using Amazon.DynamoDBv2.Model;
-using Amazon.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Providers.AWS
 {
     internal static class ModelExtensions
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+        };
 
         public static Dictionary<string, AttributeValue> ToDynamoMap(this WorkflowInstance source)
         {

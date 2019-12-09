@@ -10,13 +10,6 @@ namespace WorkflowCore.Tests.MongoDB
     [Collection("Mongo collection")]
     public class MongoPersistenceProviderFixture : BasePersistenceFixture
     {
-        MongoDockerSetup _dockerSetup;
-
-        public MongoPersistenceProviderFixture(MongoDockerSetup dockerSetup)
-        {
-            _dockerSetup = dockerSetup;
-        }
-
         protected override IPersistenceProvider Subject
         {
             get

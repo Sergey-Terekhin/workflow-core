@@ -1,9 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using JetBrains.Annotations;
 
 namespace WorkflowCore.Models.LifeCycleEvents
 {
+    /// <summary>
+    /// Event for suspended workflow
+    /// </summary>
+    [PublicAPI]
+    // ReSharper disable once InconsistentNaming
     public class WorkflowSuspended : LifeCycleEvent
     {
     }

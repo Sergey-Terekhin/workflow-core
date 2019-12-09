@@ -9,6 +9,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 {
     public class DataIOScenario : WorkflowTest<DataIOScenario.DataIOWorkflow, DataIOScenario.MyDataClass>
     {
+        // ReSharper disable once ClassNeverInstantiated.Global
         public class AddNumbers : StepBody
         {
             public int Input1 { get; set; }
@@ -45,6 +46,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public DataIOScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
         }
 

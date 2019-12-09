@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
-using FluentAssertions;
 using Xunit;
-using System.Linq.Expressions;
 
 namespace WorkflowCore.UnitTests.Services
 {
+    // ReSharper disable once InconsistentNaming
     public class WorkflowExecutorFixture
     {
         protected IWorkflowExecutor Subject;
@@ -50,7 +49,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Host, Registry, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
@@ -69,7 +68,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
@@ -99,7 +98,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
@@ -130,7 +129,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = false, StepId = 0 }
                 })
@@ -167,7 +166,7 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = new DataClass() { Value1 = 5 },
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
@@ -208,7 +207,7 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
@@ -240,7 +239,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
@@ -271,7 +270,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
@@ -300,7 +299,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })

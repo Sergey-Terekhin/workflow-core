@@ -29,7 +29,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         protected abstract Task ProcessItem(string itemId, CancellationToken cancellationToken);
 
-        public virtual void Start()
+        public virtual Task Start()
         {
             if (DispatchTask != null)
             {
@@ -38,14 +38,14 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             _cancellationTokenSource = new CancellationTokenSource();
 
-            DispatchTask = new Task(Execute, TaskCreationOptions.LongRunning);
-            DispatchTask.Start();
+            DispatchTask = Task.Factory.StartNew(Execute, TaskCreationOptions.LongRunning);
+            return Task.CompletedTask;
         }
 
-        public virtual void Stop()
+        public virtual async Task Stop()
         {
             _cancellationTokenSource.Cancel();
-            DispatchTask.Wait();
+            await DispatchTask;
             DispatchTask = null;
         }
 

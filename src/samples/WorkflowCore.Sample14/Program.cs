@@ -1,26 +1,26 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample14
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static async Task Main()
         {
             var serviceProvider = ConfigureServices();
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<RecurSampleWorkflow, MyData>();
-            host.Start();
+            await host.Start();
 
             Console.WriteLine("Starting workflow...");
-            var workflowId = host.StartWorkflow("recur-sample").Result;
+            await host.StartWorkflow("recur-sample");
 
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
@@ -33,9 +33,6 @@ namespace WorkflowCore.Sample14
             
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            //loggerFactory.AddDebug(LogLevel.Debug);
             return serviceProvider;
         }
     }

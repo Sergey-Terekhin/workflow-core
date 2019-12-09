@@ -8,6 +8,7 @@ namespace WorkflowCore.Primitives
     {
         public Action<IStepExecutionContext> Body { get; set; }
         
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             Body(context);

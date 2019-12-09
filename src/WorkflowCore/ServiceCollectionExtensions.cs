@@ -6,7 +6,6 @@ using WorkflowCore.Models;
 using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Primitives;
 using WorkflowCore.Services.BackgroundTasks;
-using WorkflowCore.Services.DefinitionStorage;
 using WorkflowCore.Services.ErrorHandlers;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -25,7 +24,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<ILifeCycleEventHub>(options.EventHubFactory);
-            services.AddSingleton<ISearchIndex>(options.SearchIndexFactory);
 
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
@@ -33,7 +31,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddTransient<IBackgroundTask, WorkflowConsumer>();
             services.AddTransient<IBackgroundTask, EventConsumer>();
-            services.AddTransient<IBackgroundTask, IndexConsumer>();
             services.AddTransient<IBackgroundTask, RunnablePoller>();
             services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
 
@@ -54,8 +51,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddTransient<IPooledObjectPolicy<IPersistenceProvider>, InjectedObjectPoolPolicy<IPersistenceProvider>>();
             services.AddTransient<IPooledObjectPolicy<IWorkflowExecutor>, InjectedObjectPoolPolicy<IWorkflowExecutor>>();
-
-            services.AddTransient<IDefinitionLoader, DefinitionLoader>();
 
             services.AddTransient<Foreach>();
 

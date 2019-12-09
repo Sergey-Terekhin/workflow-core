@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -27,7 +26,7 @@ namespace WorkflowCore.Providers.Redis.Services
             _logger = logFactory.CreateLogger(GetType());
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
+        public async Task<bool> AcquireLock(string Id, CancellationToken token)
         {
             if (_redlockFactory == null)
                 throw new InvalidOperationException();

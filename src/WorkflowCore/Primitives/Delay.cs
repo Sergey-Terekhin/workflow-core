@@ -8,6 +8,7 @@ namespace WorkflowCore.Primitives
     {
         public TimeSpan Period { get; set; }
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData != null)

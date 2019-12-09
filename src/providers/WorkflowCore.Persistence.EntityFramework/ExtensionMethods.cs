@@ -141,7 +141,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
             foreach (var ep in instance.ExecutionPointers)
             {
-                var pointer = new ExecutionPointer();                
+                var pointer = ExecutionPointer.Create();                
 
                 pointer.Id = ep.Id;
                 pointer.StepId = ep.StepId;

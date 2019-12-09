@@ -7,10 +7,11 @@ using Xunit;
 
 namespace WorkflowCore.TestSample01
 {
-    public class xUnitTest : WorkflowTest<MyWorkflow, MyDataClass>
+    public class XUnitTest : WorkflowTest<MyWorkflow, MyDataClass>
     {
-        public xUnitTest()
+        public XUnitTest()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
         }
 

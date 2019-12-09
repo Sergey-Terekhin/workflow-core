@@ -1,38 +1,41 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using WorkflowCore.Primitives;
-using WorkflowCore.Models.DefinitionStorage;
 using WorkflowCore.Models.DefinitionStorage.v1;
-using WorkflowCore.Exceptions;
+using WorkflowCore.Primitives;
 
-namespace WorkflowCore.Services.DefinitionStorage
+namespace WorkflowCore.JsonWorkflowProvider
 {
-    public class DefinitionLoader : IDefinitionLoader
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowProvider"/> which reads workflow definition from json
+    /// </summary>
+    [PublicAPI]
+    public class JsonWorkflowProvider : IWorkflowProvider
     {
-        private readonly IWorkflowRegistry _registry;
+        private readonly JsonSerializer _serializer = JsonSerializer.CreateDefault();
 
-        public DefinitionLoader(IWorkflowRegistry registry)
+        /// <inheritdoc />
+        public Task<WorkflowDefinition> LoadDefinition(TextReader reader, CancellationToken token)
         {
-            _registry = registry;
-        }
+            using var jsonReader = new JsonTextReader(reader);
+            var source = _serializer.Deserialize<DefinitionSourceV1>(jsonReader);
 
-        public WorkflowDefinition LoadDefinition(string json)
-        {
-            var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
             var def = Convert(source);
-            _registry.RegisterWorkflow(def);
-            return def;
+            return Task.FromResult(def);
         }
 
-        private WorkflowDefinition Convert(DefinitionSourceV1 source)
+        private static WorkflowDefinition Convert(DefinitionSourceV1 source)
         {
             var dataType = typeof(object);
             if (!string.IsNullOrEmpty(source.DataType))
@@ -52,12 +55,11 @@ namespace WorkflowCore.Services.DefinitionStorage
             return result;
         }
 
-
-        private WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
+        private static WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
         {
             var result = new WorkflowStepCollection();
             int i = 0;
-            var stack = new Stack<StepSourceV1>(source.Reverse<StepSourceV1>());
+            var stack = new Stack<StepSourceV1>(source.Reverse());
             var parents = new List<StepSourceV1>();
             var compensatables = new List<StepSourceV1>();
 
@@ -66,20 +68,22 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var nextStep = stack.Pop();
 
                 var stepType = FindType(nextStep.StepType);
-                var containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
-                var targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
-
-                if (nextStep.Saga)
-                {
-                    containerType = typeof(SagaContainer<>).MakeGenericType(stepType);
-                    targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
-                }
+                var containerType = nextStep.Saga
+                    ? typeof(SagaContainer<>).MakeGenericType(stepType)
+                    : typeof(WorkflowStep<>).MakeGenericType(stepType);
+                
+                var constructor = containerType.GetConstructor(Type.EmptyTypes);
+                if (constructor == null)
+                    throw new InvalidOperationException(
+                        $"Unable to find constructor without parameters for the step type: {containerType}");
+                
+                var targetStep = (WorkflowStep) constructor.Invoke(null);
 
                 if (!string.IsNullOrEmpty(nextStep.CancelCondition))
                 {
-                    var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
                     var dataParameter = Expression.Parameter(dataType, "data");
-                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] {dataParameter}, typeof(bool), nextStep.CancelCondition);
+                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] {dataParameter}, typeof(bool),
+                        nextStep.CancelCondition);
                     targetStep.CancelCondition = cancelExpr;
                 }
 
@@ -114,7 +118,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
 
                 if (!string.IsNullOrEmpty(nextStep.NextStepId))
-                    targetStep.Outcomes.Add(new StepOutcome() {ExternalNextStepId = $"{nextStep.NextStepId}"});
+                    targetStep.Outcomes.Add(new StepOutcome {ExternalNextStepId = $"{nextStep.NextStepId}"});
 
                 result.Add(targetStep);
 
@@ -165,13 +169,14 @@ namespace WorkflowCore.Services.DefinitionStorage
             return result;
         }
 
-        private void AttachInputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
+        private static void AttachInputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
         {
             foreach (var input in source.Inputs)
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] {dataParameter, contextParameter}, typeof(object), input.Value);
+                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] {dataParameter, contextParameter},
+                    typeof(object), input.Value);
 
                 var stepParameter = Expression.Parameter(stepType, "step");
                 var targetProperty = Expression.Property(stepParameter, input.Key);
@@ -181,12 +186,13 @@ namespace WorkflowCore.Services.DefinitionStorage
             }
         }
 
-        private void AttachOutputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
+        private static void AttachOutputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
         {
             foreach (var output in source.Outputs)
             {
                 var stepParameter = Expression.Parameter(stepType, "step");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] {stepParameter}, typeof(object), output.Value);
+                var sourceExpr =
+                    DynamicExpressionParser.ParseLambda(new[] {stepParameter}, typeof(object), output.Value);
 
                 var dataParameter = Expression.Parameter(dataType, "data");
                 Expression targetProperty;
@@ -210,7 +216,8 @@ namespace WorkflowCore.Services.DefinitionStorage
                         acn = (pStep, pData) =>
                         {
                             object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
-                            var targetExpr = DynamicExpressionParser.ParseLambda(new[] {Expression.Parameter(dataType)}, null,
+                            var targetExpr = DynamicExpressionParser.ParseLambda(new[] {Expression.Parameter(dataType)},
+                                null,
                                 output.Key, null);
                             var setter = CreateSetter(targetExpr);
                             setter.Compile().DynamicInvoke(pData, resolvedValue);
@@ -231,24 +238,33 @@ namespace WorkflowCore.Services.DefinitionStorage
             }
         }
 
-        private Type FindType(string name)
+        private static Type FindType(string name)
         {
             return Type.GetType(name, true, true);
         }
 
-        public LambdaExpression CreateSetter(LambdaExpression getterExpression)
+        private static LambdaExpression CreateSetter(LambdaExpression getterExpression)
         {
             var valueParameter = Expression.Parameter(getterExpression.ReturnType, "value");
             Expression assignment;
-            if (getterExpression.Body is MethodCallExpression callExpression && callExpression.Method.Name == "get_Item")
+            if (getterExpression.Body is MethodCallExpression callExpression &&
+                callExpression.Method.Name == "get_Item")
             {
                 //Get Matching setter method for the indexer
                 var parameterTypes = callExpression.Method.GetParameters()
                     .Select(p => p.ParameterType)
                     .ToArray();
+                
+                Debug.Assert(callExpression.Method.DeclaringType != null, "callExpression.Method.DeclaringType != null");
+                
                 var itemProperty = callExpression.Method.DeclaringType.GetProperty("Item", valueParameter.Type, parameterTypes);
 
-                assignment = Expression.Call(callExpression.Object, itemProperty.SetMethod, callExpression.Arguments.Concat(new[] {valueParameter}));
+                Debug.Assert(itemProperty != null, nameof(itemProperty) + " != null");
+                
+                assignment = Expression.Call(
+                    callExpression.Object, 
+                    itemProperty.SetMethod,
+                    callExpression.Arguments.Concat(new[] {valueParameter}));
             }
             else
             {

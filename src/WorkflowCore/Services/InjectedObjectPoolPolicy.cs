@@ -13,11 +13,13 @@ namespace WorkflowCore.Services
             _provider = provider;
         }
 
+        /// <inheritdoc />
         public T Create()
         {
             return _provider.GetService<T>();
         }
 
+        /// <inheritdoc />
         public bool Return(T obj)
         {
             return true;

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
@@ -43,6 +41,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public FailingSagaScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
             Workflow.Event1Fired = 0;
             Workflow.Event2Fired = 0;

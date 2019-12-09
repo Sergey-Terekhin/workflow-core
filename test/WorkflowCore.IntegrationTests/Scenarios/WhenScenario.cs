@@ -5,6 +5,7 @@ using Xunit;
 using FluentAssertions;
 using System.Threading;
 using WorkflowCore.Testing;
+// ReSharper disable RedundantDefaultMemberInitializer
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
@@ -63,6 +64,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public WhenScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
         }
 

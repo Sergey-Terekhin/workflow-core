@@ -2,7 +2,10 @@
 
 namespace WorkflowCore.Exceptions
 {
-    public class CorruptPersistenceDataException : Exception
+    /// <summary>
+    /// Exception thrown when <see cref="WorkflowCore.Interface.IStepExecutionContext.PersistenceData"/> is corrupted
+    /// </summary>
+    public class CorruptPersistenceDataException : WorkflowBaseException
     {
     }
 }

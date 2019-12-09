@@ -1,50 +1,53 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Services
 {
-    #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-
     /// <summary>
     /// Single node in-memory implementation of IDistributedLockProvider
     /// </summary>
     public class SingleNodeLockProvider : IDistributedLockProvider
-    {   
-        private List<string> _locks = new List<string>();
-     
-        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
-        {
-            lock (_locks)
-            {
-                if (_locks.Contains(Id))
-                    return false;
+    {
+        private readonly HashSet<string> _locks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly object _lock = new object();
 
-                _locks.Add(Id);
-                return true;
+        /// <inheritdoc />
+        public Task<bool> AcquireLock(string id, CancellationToken token)
+        {
+            lock (_lock)
+            {
+                if (_locks.Contains(id))
+                    return Task.FromResult(false);
+
+                _locks.Add(id);
+                return Task.FromResult(true);
             }
         }
 
-        public async Task ReleaseLock(string Id)
+        /// <inheritdoc />
+        public Task ReleaseLock(string id)
         {
-            lock (_locks)
+            lock (_lock)
             {
-                _locks.Remove(Id);
+                _locks.Remove(id);
             }
+
+            return Task.CompletedTask;
         }
 
-        public async Task Start()
+        /// <inheritdoc />
+        public Task Start()
         {
-
+            return Task.CompletedTask;
         }
 
-        public async Task Stop()
+        /// <inheritdoc />
+        public Task Stop()
         {
-
+            return Task.CompletedTask;
         }
-
     }
-
-    #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

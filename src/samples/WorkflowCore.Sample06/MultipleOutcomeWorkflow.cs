@@ -4,7 +4,7 @@ using WorkflowCore.Interface;
 using WorkflowCore.Sample06.Steps;
 
 namespace WorkflowCore.Sample06
-{    
+{
     public class MultipleOutcomeWorkflow : IWorkflow
     {
         public string Id => "MultipleOutcomeWorkflow";
@@ -15,14 +15,15 @@ namespace WorkflowCore.Sample06
         {
             builder
                 .StartWith<RandomOutput>(x => x.Name("Random Step"))
-                    .When(0)
-                        .Then<TaskA>()
-                        .Then<TaskB>()                        
-                        .End<RandomOutput>("Random Step")
-                    .When(1)
-                        .Then<TaskC>()
-                        .Then<TaskD>()
-                        .End<RandomOutput>("Random Step");
+                .When(it => 0)
+                    .Do(branch1 => branch1
+                        .StartWith<TaskA>()
+                        .Then<TaskB>())
+                .When(it => 1)
+                    .Do(branch2 => branch2
+                        .StartWith<TaskC>()
+                        .Then<TaskD>())
+                .End<RandomOutput>("Random Step");
         }
     }
 }

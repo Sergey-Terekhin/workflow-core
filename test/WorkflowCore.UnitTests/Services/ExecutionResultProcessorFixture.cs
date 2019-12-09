@@ -35,7 +35,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new ExecutionResultProcessor(PointerFactory, DateTimeProvider, EventHub, ErrorHandlers, Options, loggerFactory);
+            Subject = new ExecutionResultProcessor(PointerFactory, DateTimeProvider, EventHub, ErrorHandlers);
         }
 
         [Fact(DisplayName = "Should advance workflow")]
@@ -185,12 +185,12 @@ namespace WorkflowCore.UnitTests.Services
             instance.ExecutionPointers.Should().Contain(childPointer);
         }
         
-        private static WorkflowInstance GivenWorkflow(ExecutionPointer pointer)
+        private static WorkflowInstance GivenWorkflow(IExecutionPointer pointer)
         {
             return new WorkflowInstance
             {
                 Status = WorkflowStatus.Runnable,
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<IExecutionPointer>()
                 {
                     pointer
                 })

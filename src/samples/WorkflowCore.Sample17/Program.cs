@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 
@@ -6,20 +7,20 @@ namespace WorkflowCore.Sample17
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main()
         {
             var serviceProvider = ConfigureServices();
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<CompensatingWorkflow>();
-            host.Start();
+            await host.Start();
 
             Console.WriteLine("Starting workflow...");
-            var workflowId = host.StartWorkflow("compensate-sample").Result;
+            await host.StartWorkflow("compensate-sample");
 
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

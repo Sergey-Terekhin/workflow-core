@@ -2,40 +2,38 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample05
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main()
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<DeferSampleWorkflow>();
-            host.Start();
+            await host.Start();
 
-            host.StartWorkflow("DeferSampleWorkflow", 1, null, null);
-                        
+            await host.StartWorkflow("DeferSampleWorkflow", 1);
+
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
+            services.AddLogging(c => c.AddConsole());
             services.AddWorkflow();
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
-            
+
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddDebug();
             return serviceProvider;
         }
     }

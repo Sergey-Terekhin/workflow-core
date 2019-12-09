@@ -9,6 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Testing
 {
+    // ReSharper disable once InconsistentNaming
     public abstract class WorkflowTest<TWorkflow, TData> : IDisposable
         where TWorkflow : IWorkflow<TData>, new()
         where TData : class, new()
@@ -16,25 +17,24 @@ namespace WorkflowCore.Testing
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
-        
+
         protected virtual void Setup()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
+            services.AddLogging(c => c
+                .AddConsole()
+                .AddDebug()
+                .AddFilter(it => true));
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();
-
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            //loggerFactory.AddConsole(LogLevel.Debug);
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<TWorkflow, TData>();
             Host.OnStepError += Host_OnStepError;
-            Host.Start();
+            Host.Start().Wait();
         }
 
         protected void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
@@ -55,7 +55,7 @@ namespace WorkflowCore.Testing
         public string StartWorkflow(TData data)
         {
             var def = new TWorkflow();
-            var workflowId = Host.StartWorkflow<TData>(def.Id, data).Result;
+            var workflowId = Host.StartWorkflow(def.Id, data).Result;
             return workflowId;
         }
 
@@ -95,7 +95,7 @@ namespace WorkflowCore.Testing
         protected TData GetData(string workflowId)
         {
             var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            return (TData)instance.Data;
+            return (TData) instance.Data;
         }
 
         public void Dispose()

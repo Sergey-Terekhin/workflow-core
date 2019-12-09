@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -13,7 +14,8 @@ namespace WorkflowCore.Testing
     {
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
-        protected IDefinitionLoader DefinitionLoader;
+        protected IWorkflowProvider DefinitionLoader;
+        protected IWorkflowRegistry Registry;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
         protected virtual void Setup()
@@ -25,15 +27,12 @@ namespace WorkflowCore.Testing
 
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            //loggerFactory.AddConsole(LogLevel.Debug);
-
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
-            DefinitionLoader = serviceProvider.GetService<IDefinitionLoader>();
+            DefinitionLoader = serviceProvider.GetService<IWorkflowProvider>();
+            Registry = serviceProvider.GetService<IWorkflowRegistry>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.OnStepError += Host_OnStepError;
-            Host.Start();
+            Host.Start().Wait();
         }
 
         private void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
@@ -49,12 +48,15 @@ namespace WorkflowCore.Testing
         protected virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow();
+            services.AddSingleton<IWorkflowProvider, JsonWorkflowProvider.JsonWorkflowProvider>();
         }
 
-        public string StartWorkflow(string json, object data)
+        public async Task<string> StartWorkflow(string json, object data)
         {
-            var def = DefinitionLoader.LoadDefinition(json);
-            var workflowId = Host.StartWorkflow(def.Id, data).Result;
+            using var reader = new StringReader(json);
+            var def = await DefinitionLoader.LoadDefinition(reader);
+            Registry.RegisterWorkflow(def);
+            var workflowId = await Host.StartWorkflow(def.Id, data);
             return workflowId;
         }
 
@@ -99,7 +101,7 @@ namespace WorkflowCore.Testing
 
         public void Dispose()
         {
-            Host.Stop();
+            Host.Stop().Wait();
         }
     }
     

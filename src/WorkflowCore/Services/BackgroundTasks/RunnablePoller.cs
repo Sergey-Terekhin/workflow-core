@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -25,18 +26,20 @@ namespace WorkflowCore.Services.BackgroundTasks
             _options = options;
         }
 
-        public void Start()
+        public Task Start()
         {
             _pollTimer = new Timer(PollRunnables, null, TimeSpan.FromSeconds(0), _options.PollInterval);
+            return Task.CompletedTask;
         }
 
-        public void Stop()
+        public Task Stop()
         {
             if (_pollTimer != null)
             {
                 _pollTimer.Dispose();
                 _pollTimer = null;
             }
+            return Task.CompletedTask;
         }
 
         /// <summary>

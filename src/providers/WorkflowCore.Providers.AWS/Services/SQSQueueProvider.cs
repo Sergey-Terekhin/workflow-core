@@ -56,11 +56,9 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             var workflowQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-workflows"));
             var eventQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-events"));
-            var indexQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-index"));
 
             _queues[QueueType.Workflow] = workflowQueue.QueueUrl;
             _queues[QueueType.Event] = eventQueue.QueueUrl;
-            _queues[QueueType.Index] = indexQueue.QueueUrl;
         }
 
         public Task Stop() => Task.CompletedTask;

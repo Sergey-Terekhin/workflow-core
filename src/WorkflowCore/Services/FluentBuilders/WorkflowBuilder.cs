@@ -15,14 +15,17 @@ namespace WorkflowCore.Services
 
         protected TimeSpan? DefaultErrorRetryInterval;
 
+        /// <inheritdoc />
         public int LastStep => Steps.Max(x => x.Id);
 
+        /// <inheritdoc />
         public IWorkflowBuilder<T> UseData<T>()
         {
             IWorkflowBuilder<T> result = new WorkflowBuilder<T>(Steps);
             return result;
         }
 
+        /// <inheritdoc />
         public virtual WorkflowDefinition Build(string id, int version)
         {
             AttachExternalIds();
@@ -36,6 +39,7 @@ namespace WorkflowCore.Services
             };
         }
 
+        /// <inheritdoc />
         public void AddStep(WorkflowStep step)
         {
             step.Id = Steps.Count();
@@ -73,22 +77,21 @@ namespace WorkflowCore.Services
             this.Steps.AddRange(steps);
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, TStep> StartWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
             WorkflowStep<TStep> step = new WorkflowStep<TStep>();
             var stepBuilder = new StepBuilder<TData, TStep>(this, step);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
-            step.Name = step.Name ?? typeof(TStep).Name;
+            step.Name ??= typeof(TStep).Name;
             AddStep(step);
             return stepBuilder;
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, InlineStepBody> StartWith(Func<IStepExecutionContext, ExecutionResult> body)
         {
             WorkflowStepInline newStep = new WorkflowStepInline();
@@ -98,6 +101,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, ActionStepBody> StartWith(Action<IStepExecutionContext> body)
         {
             var newStep = new WorkflowStep<ActionStepBody>();
@@ -107,16 +111,10 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        /// <inheritdoc />
         public IEnumerable<WorkflowStep> GetUpstreamSteps(int id)
         {
             return Steps.Where(x => x.Outcomes.Any(y => y.NextStep == id)).ToList();
-        }
-
-        public IWorkflowBuilder<TData> UseDefaultErrorBehavior(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null)
-        {
-            DefaultErrorBehavior = behavior;
-            DefaultErrorRetryInterval = retryInterval;
-            return this;
         }
     }
         

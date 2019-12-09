@@ -1,18 +1,32 @@
 ﻿using System;
 using System.Collections;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Interface
 {
+    /// <summary>
+    /// Interface for step builder 
+    /// </summary>
+    /// <typeparam name="TData"></typeparam>
+    /// <typeparam name="TStepBody"></typeparam>
+    [PublicAPI]
     public interface IStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
 
+        /// <summary>
+        /// Gets instance of workflow builder
+        /// </summary>
         IWorkflowBuilder<TData> WorkflowBuilder { get; }        
 
-        WorkflowStep<TStepBody> Step { get; set; }
+        /// <summary>
+        /// Returns build step
+        /// </summary>
+        WorkflowStep<TStepBody> Step { get; }
 
         /// <summary>
         /// Specifies a display name for the step
@@ -64,14 +78,6 @@ namespace WorkflowCore.Interface
         /// <param name="id"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Attach(string id);
-
-        /// <summary>
-        /// Configure an outcome for this step, then wire it to another step
-        /// </summary>
-        /// <param name="outcomeValue"></param>
-        /// <returns></returns>
-        [Obsolete]
-        IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
 
         /// <summary>
         /// Map properties on the step to properties on the workflow data object before the step executes
@@ -130,10 +136,16 @@ namespace WorkflowCore.Interface
         /// <param name="eventName">The name used to identify the kind of event to wait for</param>
         /// <param name="eventKey">A specific key value within the context of the event to wait for</param>
         /// <param name="effectiveDate">Listen for events as of this effective date</param>
-        /// <param name="cancelCondition">A conditon that when true will cancel this WaitFor</param>
+        /// <param name="cancelCondition">A condition that when true will cancel this WaitFor</param>
         /// <returns></returns>
         IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null);
         
+        /// <summary>
+        /// End specific workflow step
+        /// </summary>
+        /// <param name="name">name of the step to end</param>
+        /// <typeparam name="TStep">Type of step body</typeparam>
+        /// <returns></returns>
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 
         /// <summary>
@@ -182,9 +194,20 @@ namespace WorkflowCore.Interface
         /// Configure an outcome for this step, then wire it to a sequence
         /// </summary>
         /// <param name="outcomeValue"></param>
+        /// <param name="label"></param>
         /// <returns></returns>
         IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null);
 
+        /// <summary>
+        /// Configure an outcome for this step, then wire it to another step
+        /// </summary>
+        /// <param name="outcomeValue"></param>
+        /// <param name="label"></param>
+        /// <returns></returns>
+        [Obsolete]
+        IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
+        
+        
         /// <summary>
         /// Execute multiple blocks of steps in parallel
         /// </summary>
@@ -246,6 +269,7 @@ namespace WorkflowCore.Interface
         /// Prematurely cancel the execution of this step on a condition
         /// </summary>
         /// <param name="cancelCondition"></param>
+        /// <param name="proceedAfterCancel"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition, bool proceedAfterCancel = false);
         

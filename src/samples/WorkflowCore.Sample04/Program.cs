@@ -1,41 +1,32 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
-using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon;
-using Amazon.Runtime;
 using WorkflowCore.Interface;
-using WorkflowCore.Persistence.MongoDB.Services;
-using WorkflowCore.Services;
-using Amazon.DynamoDBv2;
-using Amazon.SQS;
 
 namespace WorkflowCore.Sample04
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
-            host.Start();
+            await host.Start();
 
             var initialData = new MyDataClass();
             var workflowId = host.StartWorkflow("EventSampleWorkflow", 1, initialData).Result;
 
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
-            host.PublishEvent("MyEvent", workflowId, value);
+            await host.PublishEvent("MyEvent", workflowId, value);
 
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
@@ -96,7 +87,5 @@ namespace WorkflowCore.Sample04
 
             return serviceProvider;
         }
-
-        private static IConnectionMultiplexer redis;
     }
 }

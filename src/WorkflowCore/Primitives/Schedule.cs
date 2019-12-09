@@ -9,18 +9,19 @@ namespace WorkflowCore.Primitives
     {
         public TimeSpan Interval { get; set; }
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
             {
-                return ExecutionResult.Sleep(Interval, new SchedulePersistenceData() { Elapsed = false });
+                return ExecutionResult.Sleep(Interval, new SchedulePersistenceData { Elapsed = false });
             }
             
-            if (context.PersistenceData is SchedulePersistenceData)
+            if (context.PersistenceData is SchedulePersistenceData data)
             {
-                if (!((SchedulePersistenceData)context.PersistenceData).Elapsed)
+                if (!data.Elapsed)
                 {
-                    return ExecutionResult.Branch(new List<object>() { null }, new SchedulePersistenceData() { Elapsed = true });
+                    return ExecutionResult.Branch(new List<object> { null }, new SchedulePersistenceData { Elapsed = true });
                 }
                 
                 if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))

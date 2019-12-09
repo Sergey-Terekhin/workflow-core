@@ -1,10 +1,11 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
 using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using WorkflowCore.Services.DefinitionStorage;
 using WorkflowCore.TestAssets.DataTypes;
 using Xunit;
 
@@ -13,30 +14,33 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
     public class DefinitionLoaderTests
     {
 
-        private readonly IDefinitionLoader _subject;
+        private readonly IWorkflowProvider _subject;
         private readonly IWorkflowRegistry _registry;
 
         public DefinitionLoaderTests()
         {
             _registry = A.Fake<IWorkflowRegistry>();
-            _subject = new DefinitionLoader(_registry);
+            _subject = new JsonWorkflowProvider.JsonWorkflowProvider();
         }
 
         [Fact(DisplayName = "Should register workflow")]
-        public void RegisterDefinition()
+        public async Task RegisterDefinition()
         {
-            _subject.LoadDefinition("{\"Id\": \"HelloWorld\", \"Version\": 1, \"Steps\": []}");
-
+            using var reader = new StringReader("{\"Id\": \"HelloWorld\", \"Version\": 1, \"Steps\": []}");
+            var definition = await _subject.LoadDefinition(reader);
+            _registry.RegisterWorkflow(definition);
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Id == "HelloWorld"))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Version == 1))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.DataType == typeof(object)))).MustHaveHappened();
         }
 
         [Fact(DisplayName = "Should parse definition")]
-        public void ParseDefinition()
+        public async Task ParseDefinition()
         {
-            _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJson());
-
+            using var reader = new StringReader(TestAssets.Utils.GetTestDefinitionJson());
+            var definition = await _subject.LoadDefinition(reader);
+            _registry.RegisterWorkflow(definition);
+            
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Id == "Test"))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Version == 1))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.DataType == typeof(CounterBoard)))).MustHaveHappened();
@@ -45,9 +49,11 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
 
 
         [Fact(DisplayName = "Should parse definition")]
-        public void ParseDefinitionDynamic()
+        public async void ParseDefinitionDynamic()
         {
-            _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionDynamicJson());
+            using var reader = new StringReader(TestAssets.Utils.GetTestDefinitionDynamicJson());
+            var definition = await _subject.LoadDefinition(reader);
+            _registry.RegisterWorkflow(definition);
 
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Id == "Test"))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Version == 1))).MustHaveHappened();

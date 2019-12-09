@@ -2,6 +2,7 @@
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
+// ReSharper disable CheckNamespace
 namespace WorkflowCore.Sample10
 {
     public class IncrementStep : StepBody

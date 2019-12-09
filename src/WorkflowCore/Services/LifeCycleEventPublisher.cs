@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -23,6 +21,7 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger(GetType());
         }
 
+        /// <inheritdoc />
         public void PublishNotification(LifeCycleEvent evt)
         {
             if (_outbox.IsAddingCompleted)
@@ -31,24 +30,27 @@ namespace WorkflowCore.Services
             _outbox.Add(evt);
         }
 
-        public void Start()
+        /// <inheritdoc />
+        public Task Start()
         {
             if (_dispatchTask != null)
             {
                 throw new InvalidOperationException();
             }
 
-            _dispatchTask = new Task(Execute);
-            _dispatchTask.Start();
+            _dispatchTask = Task.Factory.StartNew(Execute, TaskCreationOptions.LongRunning);
+            return Task.CompletedTask;
         }
 
-        public void Stop()
+        /// <inheritdoc />
+        public async Task Stop()
         {
             _outbox.CompleteAdding();
-            _dispatchTask.Wait();
+            await _dispatchTask;
             _dispatchTask = null;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _outbox.Dispose();

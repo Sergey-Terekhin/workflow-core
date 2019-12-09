@@ -1,37 +1,44 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Interface
 {
-    public interface IWorkflowHost : IWorkflowController
+    /// <summary>
+    /// Interface for workflow host which is responsible for registering workflows as for starting and stopping them 
+    /// </summary>
+    public interface IWorkflowHost : IWorkflowController, IBackgroundTask
     {
         /// <summary>
-        /// Start the workflow host, this enable execution of workflows
+        /// Event fired then error in the step is occured
         /// </summary>
-        void Start();
-
-        /// <summary>
-        /// Stop the workflow host
-        /// </summary>
-        void Stop();
-        
-        
         event StepErrorEventHandler OnStepError;
+        
+        /// <summary>
+        /// Event fired then workflow moves from state to state
+        /// </summary>
         event LifeCycleEventHandler OnLifeCycleEvent;
+        
+        /// <summary>
+        /// Report workflow error
+        /// </summary>
+        /// <param name="workflow">Instance of workflow</param>
+        /// <param name="step">Instance of workflow step</param>
+        /// <param name="exception">Error</param>
         void ReportStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception);
-
-        //public dependencies to allow for extension method access
-        IPersistenceProvider PersistenceStore { get; }
-        IDistributedLockProvider LockProvider { get; }
-        IWorkflowRegistry Registry { get; }
-        WorkflowOptions Options { get; }
-        IQueueProvider QueueProvider { get; }
-        ILogger Logger { get; }
-
     }
 
+    /// <summary>
+    /// Delegate for <see cref="IWorkflowHost.OnStepError"/> event
+    /// </summary>
+    /// <param name="workflow">Instance of workflow</param>
+    /// <param name="step">Instance of workflow step</param>
+    /// <param name="exception">Error</param>
     public delegate void StepErrorEventHandler(WorkflowInstance workflow, WorkflowStep step, Exception exception);
+    
+    /// <summary>
+    /// Delegate for <see cref="IWorkflowHost.OnLifeCycleEvent"/> event
+    /// </summary>
+    /// <param name="evt">event instance</param>
     public delegate void LifeCycleEventHandler(LifeCycleEvent evt);
 }

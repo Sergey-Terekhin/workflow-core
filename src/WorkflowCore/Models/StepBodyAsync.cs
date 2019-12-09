@@ -5,6 +5,7 @@ namespace WorkflowCore.Models
 {
     public abstract class StepBodyAsync : IStepBody
     {
+        /// <inheritdoc />
         public abstract Task<ExecutionResult> RunAsync(IStepExecutionContext context);
     }
 }

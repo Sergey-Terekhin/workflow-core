@@ -13,7 +13,7 @@ namespace WorkflowCore.Tests.MySQL
         private readonly IPersistenceProvider _subject;
         protected override IPersistenceProvider Subject => _subject;
 
-        public MysqlPersistenceProviderFixture(MysqlDockerSetup dockerSetup, ITestOutputHelper output)
+        public MysqlPersistenceProviderFixture(ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {MysqlDockerSetup.ConnectionString}");
             _subject = new EntityFrameworkPersistenceProvider(new MysqlContextFactory(MysqlDockerSetup.ConnectionString), true, true);

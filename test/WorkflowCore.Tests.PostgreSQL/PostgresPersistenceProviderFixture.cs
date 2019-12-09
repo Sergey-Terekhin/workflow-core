@@ -14,7 +14,7 @@ namespace WorkflowCore.Tests.PostgreSQL
         private readonly IPersistenceProvider _subject;
         protected override IPersistenceProvider Subject => _subject;
 
-        public PostgresPersistenceProviderFixture(PostgresDockerSetup dockerSetup, ITestOutputHelper output)
+        public PostgresPersistenceProviderFixture(ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {PostgresDockerSetup.ConnectionString}");
             _subject = new EntityFrameworkPersistenceProvider(new PostgresContextFactory(PostgresDockerSetup.ConnectionString), true, true);

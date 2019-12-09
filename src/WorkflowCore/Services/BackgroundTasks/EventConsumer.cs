@@ -9,7 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    internal class EventConsumer : QueueConsumer, IBackgroundTask
+    internal class EventConsumer : QueueConsumer
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -67,7 +67,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     continue;
 
                 var siblingEvent = await _persistenceStore.GetEvent(eventId);
-                if ((!siblingEvent.IsProcessed) && (siblingEvent.EventTime < evt.EventTime))
+                if (!siblingEvent.IsProcessed && siblingEvent.EventTime < evt.EventTime)
                 {
                     await QueueProvider.QueueWork(eventId, QueueType.Event);
                     return false;

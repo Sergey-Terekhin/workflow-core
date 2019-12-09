@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
+    /// <summary>
+    /// Implementation of <see cref="IStepParameter"/> which uses lambda expression to connect source and target properties
+    /// </summary>
     public class MemberMapParameter : IStepParameter
     {
         private readonly LambdaExpression _source;
         private readonly LambdaExpression _target;
      
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="source">lambda expression to get source data</param>
+        /// <param name="target">lambda expression to set target data</param>
+        /// <exception cref="NotSupportedException"></exception>
         public MemberMapParameter(LambdaExpression source, LambdaExpression target)
         {
             if (target.Body.NodeType != ExpressionType.MemberAccess)
@@ -20,7 +28,7 @@ namespace WorkflowCore.Models
             _target = target;
         }
 
-        private void Assign(object sourceObject, LambdaExpression sourceExpr, object targetObject, LambdaExpression targetExpr, IStepExecutionContext context)
+        private static void Assign(object sourceObject, LambdaExpression sourceExpr, object targetObject, LambdaExpression targetExpr, IStepExecutionContext context)
         {
             object resolvedValue = null;
 
@@ -48,11 +56,13 @@ namespace WorkflowCore.Models
             assign.Compile().DynamicInvoke(targetObject);
         }
 
+        /// <inheritdoc />
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
         {
             Assign(data, _source, body, _target, context);
         }
 
+        /// <inheritdoc />
         public void AssignOutput(object data, IStepBody body, IStepExecutionContext context)
         {
             Assign(body, _source, data, _target, context);

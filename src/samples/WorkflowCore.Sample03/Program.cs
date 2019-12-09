@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
 
@@ -10,7 +11,7 @@ namespace WorkflowCore.Sample03
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main()
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
@@ -18,13 +19,7 @@ namespace WorkflowCore.Sample03
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
             host.RegisterWorkflow<PassingDataWorkflow2, Dictionary<string, int>>();
-            host.Start();
-
-            var initialData = new MyDataClass
-            {
-                Value1 = 2,
-                Value2 = 3
-            };
+            await host.Start();
 
             //host.StartWorkflow("PassingDataWorkflow", 1, initialData);
 
@@ -35,24 +30,21 @@ namespace WorkflowCore.Sample03
                 ["Value2"] = 2
             };
 
-            host.StartWorkflow("PassingDataWorkflow2", 1, initialData2);
+            await host.StartWorkflow("PassingDataWorkflow2", 1, initialData2);
 
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
+            services.AddLogging(c=>c.AddConsole());
             services.AddWorkflow();
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;", true, true));
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddDebug();
             return serviceProvider;
         }
     }

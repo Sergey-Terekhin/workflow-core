@@ -33,7 +33,7 @@ namespace WorkflowCore.Providers.AWS.Services
             _nodeId = Guid.NewGuid().ToString();
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
+        public async Task<bool> AcquireLock(string Id, CancellationToken token)
         {
             try
             {

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Sample01.Steps;
 
@@ -10,19 +11,19 @@ namespace WorkflowCore.Sample01
     public class Program
     {
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<HelloWorldWorkflow>();
-            host.Start();
+            await host.Start();
 
-            host.StartWorkflow("HelloWorld");
+            await host.StartWorkflow("HelloWorld");
 
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

@@ -11,6 +11,7 @@ namespace WorkflowCore.Primitives
 
         public bool StopCondition { get; set; }
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (StopCondition)
@@ -18,10 +19,10 @@ namespace WorkflowCore.Primitives
                 return ExecutionResult.Next();
             }
 
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
-                BranchValues = new List<object>() { null },
+                BranchValues = new List<object> { null },
                 SleepFor = Interval
             };
         }

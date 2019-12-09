@@ -9,19 +9,20 @@ namespace WorkflowCore.Primitives
     {
         public bool Condition { get; set; }                
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
             {
                 if (Condition)
                 {
-                    return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
+                    return ExecutionResult.Branch(new List<object> { null }, new ControlPersistenceData { ChildrenActive = true });
                 }
                 
                 return ExecutionResult.Next();
             }
 
-            if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
+            if (context.PersistenceData is ControlPersistenceData data && data.ChildrenActive)
             {
                 if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
                 {

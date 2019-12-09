@@ -10,16 +10,17 @@ namespace WorkflowCore.Services
     /// </summary>
     public class ScopeProvider : IScopeProvider
     {
-        private readonly IServiceProvider provider;
+        private readonly IServiceProvider _provider;
 
         public ScopeProvider(IServiceProvider provider)
         {
-            this.provider = provider;
+            this._provider = provider;
         }
 
+        /// <inheritdoc />
         public IServiceScope CreateScope()
         {
-            return provider.CreateScope();
+            return _provider.CreateScope();
         }
     }
 }

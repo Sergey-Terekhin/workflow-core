@@ -17,6 +17,7 @@ namespace WorkflowCore.Services
             _serviceProvider = serviceProvider;
         }
 
+        /// <inheritdoc />
         public WorkflowDefinition GetDefinition(string workflowId, int? version = null)
         {
             if (version.HasValue)
@@ -33,6 +34,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public void RegisterWorkflow(IWorkflow workflow)
         {
             if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
@@ -46,6 +48,7 @@ namespace WorkflowCore.Services
             _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
         }
 
+        /// <inheritdoc />
         public void RegisterWorkflow(WorkflowDefinition definition)
         {
             if (_registry.Any(x => x.Item1 == definition.Id && x.Item2 == definition.Version))
@@ -56,6 +59,7 @@ namespace WorkflowCore.Services
             _registry.Add(Tuple.Create(definition.Id, definition.Version, definition));
         }
 
+        /// <inheritdoc />
         public void RegisterWorkflow<TData>(IWorkflow<TData> workflow)
             where TData : new()
         {

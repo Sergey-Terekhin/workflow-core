@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 
+// ReSharper disable once CheckNamespace
 namespace WorkflowCore.UnitTests
 {
     public class MemberMapParameterTests

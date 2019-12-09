@@ -14,6 +14,7 @@ namespace WorkflowCore.Primitives
 
         public object EventData { get; set; }
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (!context.ExecutionPointer.EventPublished)

@@ -6,7 +6,7 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Interface
 {
     /// <remarks>
-    /// The implemention of this interface will be responsible for
+    /// The implementation of this interface will be responsible for
     /// persisting running workflow instances to a durable store
     /// </remarks>
     public interface IPersistenceProvider

@@ -6,39 +6,17 @@ namespace WorkflowCore.Models
 {
     public abstract class StepBody : IStepBody
     {
+        /// <summary>
+        /// Run step synchronously
+        /// </summary>
+        /// <param name="context">Instance of step context</param>
+        /// <returns></returns>
         public abstract ExecutionResult Run(IStepExecutionContext context);
 
+        /// <inheritdoc />
         public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
         {
             return Task.FromResult(Run(context));
-        }        
-
-        protected ExecutionResult OutcomeResult(object value)
-        {
-            return new ExecutionResult()
-            {
-                Proceed = true,
-                OutcomeValue = value
-            };
-        }
-
-        protected ExecutionResult PersistResult(object persistenceData)
-        {
-            return new ExecutionResult()
-            {
-                Proceed = false,
-                PersistenceData = persistenceData
-            };
-        }
-
-        protected ExecutionResult SleepResult(object persistenceData, TimeSpan sleep)
-        {
-            return new ExecutionResult()
-            {
-                Proceed = false,
-                PersistenceData = persistenceData,
-                SleepFor = sleep
-            };
         }
     }
 }

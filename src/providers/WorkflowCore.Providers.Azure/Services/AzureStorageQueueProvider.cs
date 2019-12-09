@@ -25,7 +25,6 @@ namespace WorkflowCore.Providers.Azure.Services
 
             _queues[QueueType.Workflow] = client.GetQueueReference("workflowcore-workflows");
             _queues[QueueType.Event] = client.GetQueueReference("workflowcore-events");
-            _queues[QueueType.Index] = client.GetQueueReference("workflowcore-index");
         }
 
         public async Task QueueWork(string id, QueueType queue)

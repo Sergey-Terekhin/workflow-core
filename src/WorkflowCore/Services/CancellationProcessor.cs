@@ -6,9 +6,10 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
+    /// <inheritdoc />
     public class CancellationProcessor : ICancellationProcessor
     {
-        protected readonly ILogger _logger;
+        private readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
 
         public CancellationProcessor(IExecutionResultProcessor executionResultProcessor, ILoggerFactory logFactory)
@@ -17,10 +18,12 @@ namespace WorkflowCore.Services
             _logger = logFactory.CreateLogger<CancellationProcessor>();
         }
 
+        /// <inheritdoc />
         public void ProcessCancellations(WorkflowInstance workflow, WorkflowDefinition workflowDef, WorkflowExecutorResult executionResult)
         {
             foreach (var step in workflowDef.Steps.Where(x => x.CancelCondition != null))
             {
+                //todo cache compiled result
                 var func = step.CancelCondition.Compile();
                 var cancel = false;
                 try

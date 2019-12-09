@@ -7,7 +7,10 @@ namespace WorkflowCore.Services
 {
     public class StepOutcomeBuilder<TData> : IStepOutcomeBuilder<TData>
     {
+        /// <inheritdoc />
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
+        
+        /// <inheritdoc />
         public StepOutcome Outcome { get; private set; }
         
         public StepOutcomeBuilder(IWorkflowBuilder<TData> workflowBuilder, StepOutcome outcome)
@@ -16,6 +19,7 @@ namespace WorkflowCore.Services
             Outcome = outcome;
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
@@ -23,17 +27,15 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(step);
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, step);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
-            step.Name = step.Name ?? typeof(TStep).Name;
+            step.Name ??= typeof(TStep).Name;
             Outcome.NextStep = step.Id;
 
             return stepBuilder;
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, TStep> Then<TStep>(IStepBuilder<TData, TStep> step)
             where TStep : IStepBody
         {
@@ -42,6 +44,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, InlineStepBody> Then(Func<IStepExecutionContext, ExecutionResult> body)
         {
             WorkflowStepInline newStep = new WorkflowStepInline();
@@ -52,6 +55,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        /// <inheritdoc />
         public void EndWorkflow()
         {
             EndStep newStep = new EndStep();

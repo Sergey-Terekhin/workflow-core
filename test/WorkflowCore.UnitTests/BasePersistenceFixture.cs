@@ -195,7 +195,7 @@ namespace WorkflowCore.UnitTests
 
             for (int i = 0; i < 30; i++)
             {
-                actions.Add(() =>
+                actions.Add(async () =>
                 {
                     var oldWorkflow = new WorkflowInstance()
                     {
@@ -213,7 +213,7 @@ namespace WorkflowCore.UnitTests
                         Active = true,
                         StepId = 0
                     });
-                    var workflowId = subject.CreateNewWorkflow(oldWorkflow).Result;
+                    await subject.CreateNewWorkflow(oldWorkflow);
                     var newWorkflow = Utils.DeepCopy(oldWorkflow);
                     newWorkflow.NextExecution = 7;
                     newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });

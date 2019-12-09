@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -12,22 +11,29 @@ namespace WorkflowCore.Services
     {
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IDateTimeProvider _datetimeProvider;
-        private readonly ILogger _logger;
         private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IEnumerable<IWorkflowErrorHandler> _errorHandlers;
-        private readonly WorkflowOptions _options;
 
-        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, ILifeCycleEventPublisher eventPublisher, IEnumerable<IWorkflowErrorHandler> errorHandlers, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public ExecutionResultProcessor(
+            IExecutionPointerFactory pointerFactory, 
+            IDateTimeProvider datetimeProvider,
+            ILifeCycleEventPublisher eventPublisher, 
+            IEnumerable<IWorkflowErrorHandler> errorHandlers)
         {
             _pointerFactory = pointerFactory;
             _datetimeProvider = datetimeProvider;
             _eventPublisher = eventPublisher;
             _errorHandlers = errorHandlers;
-            _options = options;
-            _logger = loggerFactory.CreateLogger<ExecutionResultProcessor>();
         }
 
-        public void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
+        /// <inheritdoc />
+        public void ProcessExecutionResult(
+            WorkflowInstance workflow,
+            WorkflowDefinition def, 
+            IExecutionPointer pointer, 
+            WorkflowStep step, 
+            ExecutionResult result, 
+            WorkflowExecutorResult workflowResult)
         {
             if (result.Terminated)
             {
@@ -50,7 +56,7 @@ namespace WorkflowCore.Services
                 pointer.Active = false;
                 pointer.Status = PointerStatus.WaitingForEvent;
 
-                workflowResult.Subscriptions.Add(new EventSubscription()
+                workflowResult.Subscriptions.Add(new EventSubscription
                 {
                     WorkflowId = workflow.Id,
                     StepId = pointer.StepId,
@@ -67,7 +73,7 @@ namespace WorkflowCore.Services
                 pointer.Status = PointerStatus.WaitingForEvent;
                 foreach (var resultEventsName in result.EventsNames)
                 {
-                    workflowResult.Subscriptions.Add(new EventSubscription()
+                    workflowResult.Subscriptions.Add(new EventSubscription
                     {
                         WorkflowId = workflow.Id,
                         StepId = pointer.StepId,
@@ -84,12 +90,12 @@ namespace WorkflowCore.Services
                 pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
                 pointer.Status = PointerStatus.Complete;
 
-                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
+                foreach (var outcomeTarget in step.Outcomes.Where(x => Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
                 {                    
                     workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
                 }
 
-                _eventPublisher.PublishNotification(new StepCompleted()
+                _eventPublisher.PublishNotification(new StepCompleted
                 {
                     EventTimeUtc = _datetimeProvider.Now,
                     Reference = workflow.Reference,
@@ -113,9 +119,10 @@ namespace WorkflowCore.Services
             }
         }
 
-        public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception)
+        /// <inheritdoc />
+        public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, IExecutionPointer pointer, WorkflowStep step, Exception exception)
         {
-            _eventPublisher.PublishNotification(new WorkflowError()
+            _eventPublisher.PublishNotification(new WorkflowError
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,
@@ -128,7 +135,7 @@ namespace WorkflowCore.Services
             });
             pointer.Status = PointerStatus.Failed;
             
-            var queue = new Queue<ExecutionPointer>();
+            var queue = new Queue<IExecutionPointer>();
             queue.Enqueue(pointer);
 
             while (queue.Count > 0)
@@ -136,7 +143,7 @@ namespace WorkflowCore.Services
                 var exceptionPointer = queue.Dequeue();
                 var exceptionStep = def.Steps.FindById(exceptionPointer.StepId);
                 var shouldCompensate = ShouldCompensate(workflow, def, exceptionPointer);
-                var errorOption = (exceptionStep.ErrorBehavior ?? (shouldCompensate ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
+                var errorOption = exceptionStep.ErrorBehavior ?? (shouldCompensate ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior);
 
                 foreach (var handler in _errorHandlers.Where(x => x.Type == errorOption))
                 {
@@ -145,7 +152,7 @@ namespace WorkflowCore.Services
             }
         }
         
-        private bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
+        private bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def, IExecutionPointer currentPointer)
         {
             var scope = new Stack<string>(currentPointer.Scope);
             scope.Push(currentPointer.Id);
@@ -155,7 +162,7 @@ namespace WorkflowCore.Services
                 var pointerId = scope.Pop();
                 var pointer = workflow.ExecutionPointers.FindById(pointerId);
                 var step = def.Steps.FindById(pointer.StepId);
-                if ((step.CompensationStepId.HasValue) || (step.RevertChildrenAfterCompensation))
+                if (step.CompensationStepId.HasValue || step.RevertChildrenAfterCompensation)
                     return true;
             }
 

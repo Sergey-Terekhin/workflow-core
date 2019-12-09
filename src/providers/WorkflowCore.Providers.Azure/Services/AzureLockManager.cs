@@ -29,7 +29,7 @@ namespace WorkflowCore.Providers.Azure.Services
             _client = account.CreateCloudBlobClient();
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
+        public async Task<bool> AcquireLock(string Id, CancellationToken token)
         {
             var blob = _container.GetBlockBlobReference(Id);
 

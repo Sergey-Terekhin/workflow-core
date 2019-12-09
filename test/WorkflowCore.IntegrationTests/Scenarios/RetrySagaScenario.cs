@@ -53,6 +53,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public RetrySagaScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
             Workflow.Event1Fired = 0;
             Workflow.Event2Fired = 0;

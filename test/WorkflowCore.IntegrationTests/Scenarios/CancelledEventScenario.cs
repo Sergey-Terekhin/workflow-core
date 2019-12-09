@@ -5,6 +5,7 @@ using Xunit;
 using FluentAssertions;
 using System.Linq;
 using WorkflowCore.Testing;
+// ReSharper disable RedundantDefaultMemberInitializer
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
@@ -29,21 +30,32 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                     .Parallel()
                         .Do(branch1 => branch1
                             .StartWith(context => ExecutionResult.Next())
-                            .WaitFor("Event1", (data, context) => context.Workflow.Id, null, data => !string.IsNullOrEmpty(data.StrValue))
-                                .Output(data => data.StrValue, step => step.EventData)
+                            .WaitFor(
+                                "Event1", 
+                                (data, context) => context.Workflow.Id, 
+                                null, 
+                                data => !string.IsNullOrEmpty(data.StrValue))
+                                .Output(
+                                data => data.StrValue, 
+                                step => step.EventData)
                             .Then(context => Event1Fired = true))
                         .Do(branch2 => branch2
                             .StartWith(context => ExecutionResult.Next())
-                            .WaitFor("Event2", (data, context) => context.Workflow.Id, null, data => !string.IsNullOrEmpty(data.StrValue))
+                            .WaitFor(
+                                "Event2", 
+                                (data, context) => context.Workflow.Id,
+                                null, 
+                                data => !string.IsNullOrEmpty(data.StrValue))
                                 .Output(data => data.StrValue, step => step.EventData)
                             .Then(context => Event2Fired = true))
                         .Join()
-                        .WaitFor("Event3", (data, context) => context.Workflow.Id, null);
+                        .WaitFor("Event3", (data, context) => context.Workflow.Id);
             }
         }
 
         public CancelledEventScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
         }
 
@@ -62,8 +74,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
             UnhandledStepErrors.Count.Should().Be(0);
             GetData(workflowId).StrValue.Should().Be("Pass");
-            EventWorkflow.Event1Fired.Should().BeFalse();
-            EventWorkflow.Event2Fired.Should().BeTrue();
+            EventWorkflow.Event1Fired.Should().BeTrue();
+            EventWorkflow.Event2Fired.Should().BeFalse();
         }
     }
 }

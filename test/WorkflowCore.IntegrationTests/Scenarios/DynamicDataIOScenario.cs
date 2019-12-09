@@ -52,6 +52,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public DynamicDataIOScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
         }
 

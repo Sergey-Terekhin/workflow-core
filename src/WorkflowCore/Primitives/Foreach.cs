@@ -10,17 +10,18 @@ namespace WorkflowCore.Primitives
     {
         public IEnumerable Collection { get; set; }                
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
             {
                 var values = Collection.Cast<object>();
-                return ExecutionResult.Branch(new List<object>(values), new ControlPersistenceData() { ChildrenActive = true });
+                return ExecutionResult.Branch(new List<object>(values), new ControlPersistenceData { ChildrenActive = true });
             }
 
-            if (context.PersistenceData is ControlPersistenceData)
+            if (context.PersistenceData is ControlPersistenceData data)
             {
-                if ((context.PersistenceData as ControlPersistenceData).ChildrenActive)
+                if (data.ChildrenActive)
                 {
                     if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
                     {

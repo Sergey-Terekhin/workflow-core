@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -22,7 +21,6 @@ namespace WorkflowCore.Providers.Redis.Services
         {
             [QueueType.Workflow] = "workflows",
             [QueueType.Event] = "events",
-            [QueueType.Index] = "index"
         };
 
         public RedisQueueProvider(string connectionString, string prefix, ILoggerFactory logFactory)

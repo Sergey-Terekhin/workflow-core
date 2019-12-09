@@ -7,14 +7,15 @@ namespace WorkflowCore.Primitives
 {
     public class Sequence : ContainerStepBody
     {
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
             {
-                return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
+                return ExecutionResult.Branch(new List<object> { null }, new ControlPersistenceData { ChildrenActive = true });
             }
 
-            if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
+            if (context.PersistenceData is ControlPersistenceData data && data.ChildrenActive)
             { 
                 if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
                 {

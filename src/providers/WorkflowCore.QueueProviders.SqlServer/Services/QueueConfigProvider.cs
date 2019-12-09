@@ -1,7 +1,6 @@
 ﻿#region using
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using WorkflowCore.Interface;
@@ -21,7 +20,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         {
             [QueueType.Workflow] = new QueueConfig("workflow"),
             [QueueType.Event] = new QueueConfig("event"),
-            [QueueType.Index] = new QueueConfig("indexq")
         };
 
         public QueueConfig GetByQueue(QueueType queue) => _queues[queue];

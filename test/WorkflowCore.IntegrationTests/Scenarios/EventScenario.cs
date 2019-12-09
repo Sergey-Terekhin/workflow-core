@@ -33,6 +33,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public EventScenario()
         {
+            // ReSharper disable once VirtualMemberCallInConstructor
             Setup();
         }
 

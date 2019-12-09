@@ -6,10 +6,13 @@ namespace WorkflowCore.Primitives
     public class SagaContainer<TStepBody> : WorkflowStep<TStepBody>
         where TStepBody : IStepBody
     {
+        /// <inheritdoc />
         public override bool ResumeChildrenAfterCompensation => false;
+        /// <inheritdoc />
         public override bool RevertChildrenAfterCompensation => true;
 
-        public override void PrimeForRetry(ExecutionPointer pointer)
+        /// <inheritdoc />
+        public override void PrimeForRetry(IExecutionPointer pointer)
         {
             base.PrimeForRetry(pointer);
             pointer.PersistenceData = null;

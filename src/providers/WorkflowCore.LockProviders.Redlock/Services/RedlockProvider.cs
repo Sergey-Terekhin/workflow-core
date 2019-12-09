@@ -28,7 +28,7 @@ namespace WorkflowCore.LockProviders.Redlock.Services
 
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
+        public async Task<bool> AcquireLock(string Id, CancellationToken token)
         {
             
             var redLock = await _redlockFactory.CreateLockAsync(Id, _lockTimeout);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +33,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task PersistWorkflow(WorkflowInstance workflow)
         {
             lock (_instances)
@@ -44,6 +44,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
             lock (_instances)
@@ -53,6 +54,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
             lock (_instances)
@@ -61,6 +63,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
         {
             if (ids == null)
@@ -74,6 +77,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
             lock (_instances)
@@ -105,6 +109,7 @@ namespace WorkflowCore.Services
         }
 
 
+        /// <inheritdoc />
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
             lock (_subscriptions)
@@ -115,6 +120,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
             lock (_subscriptions)
@@ -124,6 +130,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task TerminateSubscription(string eventSubscriptionId)
         {
             lock (_subscriptions)
@@ -133,10 +140,12 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public void EnsureStoreExists()
         {
         }
 
+        /// <inheritdoc />
         public async Task<string> CreateEvent(Event newEvent)
         {
             lock (_events)
@@ -147,11 +156,13 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public Task RemoveEventsByKey(string eventKey)
         {
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public async Task MarkEventProcessed(string id)
         {
             lock (_events)
@@ -162,6 +173,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
             lock (_events)
@@ -174,6 +186,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<Event> GetEvent(string id)
         {
             lock (_events)
@@ -182,6 +195,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
         {
             lock (_events)
@@ -194,6 +208,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task MarkEventUnprocessed(string id)
         {
             lock (_events)
@@ -206,6 +221,7 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             lock (errors)

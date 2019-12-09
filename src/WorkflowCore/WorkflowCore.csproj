@@ -1,47 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyTitle>Workflow Core</AssemblyTitle>
-    <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>WorkflowCore</AssemblyName>
-    <PackageId>Avanpost.WorkflowCore</PackageId>
-    <PackageTags>workflow;.NET;Core;state machine</PackageTags>
-    <PackageProjectUrl>https://github.com/avanpostid/workflow-core</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/avanpostid/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/avanpostid/workflow-core</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
-    <Version>1.9.3.7</Version>
-    <AssemblyVersion>1.9.3.7</AssemblyVersion>
-    <FileVersion>1.9.3.7</FileVersion>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/avanpostid/workflow-core/master/src/logo.png</PackageIconUrl>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <LangVersion>Latest</LangVersion>
+        <AssemblyTitle>Workflow Core</AssemblyTitle>
+        <Authors>Daniel Gerlag; Vizir Team</Authors>
+        <AssemblyName>WorkflowCore</AssemblyName>
+        <PackageId>WorkflowCore</PackageId>
+        <PackageTags>workflow;.NET;Core;state machine</PackageTags>
+        <PackageProjectUrl>https://github.com/Sergey-Terekhin/workflow-core</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/Sergey-Terekhin/workflow-core</RepositoryUrl>
+        <Description>Workflow Core is a light weight workflow engine targeting .NET Standard. Based on Avanpost.WorkflowCore package</Description>
+        <PackageIcon>logo.png</PackageIcon>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="1.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.12" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-    <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
-  </ItemGroup>
-
-  <!--<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
-    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
-  </ItemGroup>-->
-
-  <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>-->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+        <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="1.1.1" />
+        <PackageReference Include="JetBrains.Annotations" Version="2019.1.3">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="..\logo.png" Pack="true" PackagePath="\">
+            <Link>logo.png</Link>
+        </None>
+    </ItemGroup>
 
 </Project>

@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample13
 {
     class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
@@ -16,13 +16,13 @@ namespace WorkflowCore.Sample13
             var controller = serviceProvider.GetService<IWorkflowController>();
             controller.RegisterWorkflow<ParallelWorkflow, MyData>();
 
-            host.Start();
+            await host.Start();
 
             Console.WriteLine("Starting workflow...");
-            controller.StartWorkflow<MyData>("parallel-sample");
+            await controller.StartWorkflow<MyData>("parallel-sample");
             
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
@@ -49,9 +49,6 @@ namespace WorkflowCore.Sample13
 
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            //loggerFactory.AddDebug(LogLevel.Debug);
             return serviceProvider;
         }
     }

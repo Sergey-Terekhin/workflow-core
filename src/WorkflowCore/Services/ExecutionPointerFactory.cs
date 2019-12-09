@@ -6,9 +6,11 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
+    /// <inheritdoc />
     public class ExecutionPointerFactory : IExecutionPointerFactory
     {
-        public ExecutionPointer BuildGenesisPointer(WorkflowDefinition def)
+        /// <inheritdoc />
+        public IExecutionPointer BuildGenesisPointer(WorkflowDefinition def)
         {
             return new ExecutionPointer
             {
@@ -20,10 +22,11 @@ namespace WorkflowCore.Services
             };
         }
 
-        public ExecutionPointer BuildNextPointer(WorkflowDefinition def, ExecutionPointer pointer, StepOutcome outcomeTarget)
+        /// <inheritdoc />
+        public IExecutionPointer BuildNextPointer(WorkflowDefinition def, IExecutionPointer pointer, StepOutcome outcomeTarget)
         {
             var nextId = GenerateId();
-            return new ExecutionPointer()
+            return new ExecutionPointer
             {
                 Id = nextId,
                 PredecessorId = pointer.Id,
@@ -36,14 +39,15 @@ namespace WorkflowCore.Services
             };            
         }
 
-        public ExecutionPointer BuildChildPointer(WorkflowDefinition def, ExecutionPointer pointer, int childDefinitionId, object branch)
+        /// <inheritdoc />
+        public IExecutionPointer BuildChildPointer(WorkflowDefinition def, IExecutionPointer pointer, int childDefinitionId, object branch)
         {
             var childPointerId = GenerateId();
             var childScope = new List<string>(pointer.Scope);
             childScope.Insert(0, pointer.Id);
             pointer.Children.Add(childPointerId);
 
-            return new ExecutionPointer()
+            return new ExecutionPointer
             {
                 Id = childPointerId,
                 PredecessorId = pointer.Id,
@@ -56,10 +60,11 @@ namespace WorkflowCore.Services
             };            
         }
 
-        public ExecutionPointer BuildCompensationPointer(WorkflowDefinition def, ExecutionPointer pointer, ExecutionPointer exceptionPointer, int compensationStepId)
+        /// <inheritdoc />
+        public IExecutionPointer BuildCompensationPointer(WorkflowDefinition def, IExecutionPointer pointer, IExecutionPointer exceptionPointer, int compensationStepId)
         {
             var nextId = GenerateId();
-            return new ExecutionPointer()
+            return new ExecutionPointer
             {
                 Id = nextId,
                 PredecessorId = exceptionPointer.Id,

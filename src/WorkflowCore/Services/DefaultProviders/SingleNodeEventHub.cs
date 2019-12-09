@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
@@ -10,7 +9,7 @@ namespace WorkflowCore.Services
 {
     public class SingleNodeEventHub : ILifeCycleEventHub
     {
-        private ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
+        private readonly ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
         private readonly ILogger _logger;
 
         public SingleNodeEventHub(ILoggerFactory loggerFactory)
@@ -18,6 +17,7 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger<SingleNodeEventHub>();
         }
 
+        /// <inheritdoc />
         public Task PublishNotification(LifeCycleEvent evt)
         {
             Task.Run(() =>
@@ -41,16 +41,19 @@ namespace WorkflowCore.Services
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Subscribe(Action<LifeCycleEvent> action)
         {
             _subscribers.Add(action);
         }
 
+        /// <inheritdoc />
         public Task Start()
         {
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task Stop()
         {
             _subscribers.Clear();

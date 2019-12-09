@@ -8,6 +8,7 @@ namespace WorkflowCore.Primitives
     {
         public Func<IStepExecutionContext, ExecutionResult> Body { get; set; }
 
+        /// <inheritdoc />
         public override IStepBody ConstructBody(IServiceProvider serviceProvider)
         {
             return new InlineStepBody(Body);

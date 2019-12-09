@@ -21,6 +21,7 @@ namespace WorkflowCore.Services
             _referenceBuilder = referenceBuilder;
         }
         
+        /// <inheritdoc />
         public IStepBuilder<TData, TParentStep> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);

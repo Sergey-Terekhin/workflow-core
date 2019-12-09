@@ -23,6 +23,7 @@ namespace WorkflowCore.Services
             _referenceBuilder = referenceBuilder;
         }
         
+        /// <inheritdoc />
         public IParallelStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             var lastStep = WorkflowBuilder.LastStep;
@@ -36,6 +37,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        /// <inheritdoc />
         public IStepBuilder<TData, Sequence> Join()
         {
             return _referenceBuilder;

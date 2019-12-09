@@ -3,7 +3,6 @@ using Docker.DotNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -25,15 +24,15 @@ namespace Docker.Testify
         public abstract bool TestReady();
         public abstract void PublishConnectionInfo();
 
-        protected readonly DockerClient docker;
-    	protected string containerId;
+        protected readonly DockerClient Docker;
+    	protected string ContainerId;
 
         protected DockerSetup()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    			docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+    			Docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
     		else
-    			docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();
+    			Docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();
 
             ExternalPort = GetFreePort();
 
@@ -52,11 +51,11 @@ namespace Docker.Testify
             };
 
             hostCfg.PortBindings = new Dictionary<string, IList<PortBinding>>();
-            hostCfg.PortBindings.Add($"{InternalPort}/tcp", new PortBinding[] { pb });
+            hostCfg.PortBindings.Add($"{InternalPort}/tcp", new[] { pb });
 
             await PullImage(ImageName, ImageTag);	        
 
-            var container = await docker.Containers.CreateContainerAsync(new CreateContainerParameters()
+            var container = await Docker.Containers.CreateContainerAsync(new CreateContainerParameters()
             {
                 Image = $"{ImageName}:{ImageTag}",
                 Name = $"{ContainerPrefix}-{Guid.NewGuid()}",
@@ -65,10 +64,10 @@ namespace Docker.Testify
             });
 
             Debug.WriteLine("Starting docker container...");
-            var started = await docker.Containers.StartContainerAsync(container.ID, new ContainerStartParameters());
+            var started = await Docker.Containers.StartContainerAsync(container.ID, new ContainerStartParameters());
             if (started)
             {
-                containerId = container.ID;
+                ContainerId = container.ID;
                 PublishConnectionInfo();
 
                 Debug.WriteLine("Waiting service to start in the docker container...");
@@ -100,7 +99,7 @@ namespace Docker.Testify
 
         public async Task PullImage(string name, string tag)
         {
-            var images = docker.Images.ListImagesAsync(new ImagesListParameters()).Result;
+            var images = Docker.Images.ListImagesAsync(new ImagesListParameters()).Result;
             var exists = images
                 .Where(x => x.RepoTags != null)
                 .Any(x => x.RepoTags.Contains($"{name}:{tag}"));
@@ -109,13 +108,13 @@ namespace Docker.Testify
                 return;
 
             Debug.WriteLine($"Pulling docker image {name}:{tag}");
-            await docker.Images.CreateImageAsync(new ImagesCreateParameters() { FromImage = name, Tag = tag }, null, new Progress<JSONMessage>());
+            await Docker.Images.CreateImageAsync(new ImagesCreateParameters() { FromImage = name, Tag = tag }, null, new Progress<JSONMessage>());
         }
 
         public void Dispose()
     	{
-    	    docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
-    	    docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
+    	    Docker.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters()).Wait();
+    	    Docker.Containers.RemoveContainerAsync(ContainerId, new ContainerRemoveParameters() { Force = true }).Wait();
     	}
 
         private int GetFreePort()

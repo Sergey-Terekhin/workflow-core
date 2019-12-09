@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services.ErrorHandlers
 {
@@ -25,7 +23,8 @@ namespace WorkflowCore.Services.ErrorHandlers
             _options = options;
         }
 
-        public void Handle(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer exceptionPointer, WorkflowStep exceptionStep, Exception exception, Queue<ExecutionPointer> bubbleUpQueue)
+        /// <inheritdoc />
+        public void Handle(WorkflowInstance workflow, WorkflowDefinition def, IExecutionPointer exceptionPointer, WorkflowStep exceptionStep, Exception exception, Queue<IExecutionPointer> bubbleUpQueue)
         {
             var scope = new Stack<string>(exceptionPointer.Scope.Reverse());
             scope.Push(exceptionPointer.Id);
@@ -45,7 +44,7 @@ namespace WorkflowCore.Services.ErrorHandlers
                     var parentId = txnStack.Pop();
                     var parentPointer = workflow.ExecutionPointers.FindById(parentId);
                     var parentStep = def.Steps.FindById(parentPointer.StepId);
-                    if ((!parentStep.ResumeChildrenAfterCompensation) || (parentStep.RevertChildrenAfterCompensation))
+                    if (!parentStep.ResumeChildrenAfterCompensation || parentStep.RevertChildrenAfterCompensation)
                     {
                         resume = parentStep.ResumeChildrenAfterCompensation;
                         revert = parentStep.RevertChildrenAfterCompensation;

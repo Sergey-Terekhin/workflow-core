@@ -14,6 +14,7 @@ namespace WorkflowCore.Primitives
             _body = body;
         }
 
+        /// <inheritdoc />
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             return _body.Invoke(context);

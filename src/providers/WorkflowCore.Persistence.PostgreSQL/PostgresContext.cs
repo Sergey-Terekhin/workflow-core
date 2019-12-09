@@ -14,8 +14,7 @@ namespace WorkflowCore.Persistence.PostgreSQL
         private readonly string _tablePrefix;
         private readonly string _schema;
 
-        public PostgresContext(string connectionString,string schema,string tablePrefix)
-            :base()
+        public PostgresContext(string connectionString, string schema, string tablePrefix)
         {
             _schema = schema;
             _tablePrefix = tablePrefix;
@@ -42,7 +41,7 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.ToTable(_tablePrefix + "Workflow", _schema);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
-                
+
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
             builder.ToTable(_tablePrefix + "ExecutionPointer", _schema);
@@ -55,7 +54,8 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
-        protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
+        protected override void ConfigureExetensionAttributeStorage(
+            EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
             builder.ToTable(_tablePrefix + "ExtensionAttribute", _schema);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
@@ -68,4 +68,3 @@ namespace WorkflowCore.Persistence.PostgreSQL
         }
     }
 }
-

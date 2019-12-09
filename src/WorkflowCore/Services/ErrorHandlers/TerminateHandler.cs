@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -19,10 +18,11 @@ namespace WorkflowCore.Services.ErrorHandlers
             _datetimeProvider = datetimeProvider;
         }
 
-        public void Handle(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception, Queue<ExecutionPointer> bubbleUpQueue)
+        /// <inheritdoc />
+        public void Handle(WorkflowInstance workflow, WorkflowDefinition def, IExecutionPointer pointer, WorkflowStep step, Exception exception, Queue<IExecutionPointer> bubbleUpQueue)
         {
             workflow.Status = WorkflowStatus.Terminated;
-            _eventPublisher.PublishNotification(new WorkflowTerminated()
+            _eventPublisher.PublishNotification(new WorkflowTerminated
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,

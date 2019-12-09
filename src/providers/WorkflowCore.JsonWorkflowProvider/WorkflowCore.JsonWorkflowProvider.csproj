@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <LangVersion>Latest</LangVersion>
+    <AssemblyName>WorkflowCore.JsonWorkflowProvider</AssemblyName>
+    <PackageId>WorkflowCore.JsonWorkflowProvider</PackageId>
+    <Authors>Vizir Team</Authors>
+    <PackageTags>workflow;.NET;Core;state machine</PackageTags>
+    <PackageProjectUrl>https://github.com/Sergey-Terekhin/workflow-core</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Sergey-Terekhin/workflow-core</RepositoryUrl>
+    <Description>Workflow Core is a light weight workflow engine targeting .NET Standard. Based on Avanpost.WorkflowCore package</Description>
+    <PackageIcon>logo.png</PackageIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.7.12" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None  Include="..\..\logo.png" Pack="true" PackagePath="\">
+      <Link>logo.png</Link>
+    </None >
+  </ItemGroup>
+</Project>

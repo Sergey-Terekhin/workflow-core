@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
+    /// <summary>
+    /// Implementation of <see cref="IStepParameter"/> which accepts action to connect step body and provided data
+    /// </summary>
+    /// <typeparam name="TStepBody">Type of step body</typeparam>
+    /// <typeparam name="TData">Type of workflow data</typeparam>
     public class ActionParameter<TStepBody, TData> : IStepParameter
     {
         private readonly Action<TStepBody, TData> _action;
      
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="action">Action to connect step body and provided data</param>
         public ActionParameter(Action<TStepBody, TData> action)
         {
             _action = action;
@@ -20,11 +27,13 @@ namespace WorkflowCore.Models
             _action.Invoke((TStepBody)step, (TData)data);
         }
 
+        /// <inheritdoc />
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
         {
             Assign(data, body, context);
         }
 
+        /// <inheritdoc />
         public void AssignOutput(object data, IStepBody body, IStepExecutionContext context)
         {
             Assign(data, body, context);

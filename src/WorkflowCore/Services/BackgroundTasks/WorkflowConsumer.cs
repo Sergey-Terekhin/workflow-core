@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    internal class WorkflowConsumer : QueueConsumer, IBackgroundTask
+    internal class WorkflowConsumer : QueueConsumer
     {
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
@@ -55,14 +55,13 @@ namespace WorkflowCore.Services.BackgroundTasks
                         {
                             _executorPool.Return(executor);
                             await persistenceStore.PersistWorkflow(workflow);
-                            await QueueProvider.QueueWork(itemId, QueueType.Index);
                         }
                     }
                 }
                 finally
                 {
                     await _lockProvider.ReleaseLock(itemId);
-                    if ((workflow != null) && (result != null))
+                    if (workflow != null && result != null)
                     {
                         foreach (var sub in result.Subscriptions)
                         {
@@ -73,7 +72,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                         var readAheadTicks = _datetimeProvider.Now.Add(Options.PollInterval).ToUniversalTime().Ticks;
 
-                        if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
+                        if (workflow.Status == WorkflowStatus.Runnable && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
                         {
 #pragma warning disable 4014
                             FutureQueue(workflow, cancellationToken);
@@ -116,7 +115,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     return;
                 }
 
-                var target = (workflow.NextExecution.Value - _datetimeProvider.Now.ToUniversalTime().Ticks);
+                var target = workflow.NextExecution.Value - _datetimeProvider.Now.ToUniversalTime().Ticks;
                 if (target > 0)
                 {
                     await Task.Delay(TimeSpan.FromTicks(target), cancellationToken);

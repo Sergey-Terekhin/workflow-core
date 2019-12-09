@@ -1,26 +1,26 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample16
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main()
         {
             var serviceProvider = ConfigureServices();
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<ScheduleWorkflow>();
-            host.Start();
+            await host.Start();
 
             Console.WriteLine("Starting workflow...");
-            var workflowId = host.StartWorkflow("schedule-sample").Result;
+            await host.StartWorkflow("schedule-sample");
 
             Console.ReadLine();
-            host.Stop();
+            await host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
@@ -31,9 +31,6 @@ namespace WorkflowCore.Sample16
 
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            //loggerFactory.AddDebug(LogLevel.Debug);
             return serviceProvider;
         }
     }

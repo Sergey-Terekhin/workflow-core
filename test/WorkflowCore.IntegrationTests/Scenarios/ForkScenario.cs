@@ -4,13 +4,16 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 
+// ReSharper disable RedundantDefaultMemberInitializer
+// ReSharper disable InconsistentNaming
+
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
     public class ForkScenario : BaseScenario<ForkScenario.OutcomeFork, Object>
     {
-        static int TaskATicker = 0;
-        static int TaskBTicker = 0;
-        static int TaskCTicker = 0;
+        private static int TaskATicker = 0;
+        private static int TaskBTicker = 0;
+        private static int TaskCTicker = 0;
 
         public class TaskA : StepBody
         {
@@ -43,6 +46,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         {
             public string Id => "OutcomeFork";
             public int Version => 1;
+
             public void Build(IWorkflowBuilder<Object> builder)
             {
                 var taskA = builder.StartWith<TaskA>();
@@ -52,7 +56,6 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 taskA
                     .When(true)
                     .Then<TaskC>();
-
             }
         }
 

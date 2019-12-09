@@ -5,13 +5,15 @@ namespace WorkflowCore.Primitives
 {
     public class EndStep : WorkflowStep
     {
+        /// <inheritdoc />
         public override Type BodyType => null;
 
+        /// <inheritdoc />
         public override ExecutionPipelineDirective InitForExecution(
             WorkflowExecutorResult executorResult, 
-            WorkflowDefinition defintion, 
+            WorkflowDefinition definition, 
             WorkflowInstance workflow, 
-            ExecutionPointer executionPointer)
+            IExecutionPointer executionPointer)
         {
             return ExecutionPipelineDirective.EndWorkflow;
         }
