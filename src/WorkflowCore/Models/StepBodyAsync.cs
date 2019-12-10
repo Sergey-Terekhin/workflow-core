@@ -3,6 +3,9 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
+    /// <summary>
+    /// Step body which executes asynchronously
+    /// </summary>
     public abstract class StepBodyAsync : IStepBody
     {
         /// <inheritdoc />

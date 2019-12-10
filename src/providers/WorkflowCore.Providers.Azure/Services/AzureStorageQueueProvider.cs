@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using WorkflowCore.Interface;
@@ -11,15 +10,12 @@ namespace WorkflowCore.Providers.Azure.Services
 {
     public class AzureStorageQueueProvider : IQueueProvider
     {
-        private readonly ILogger _logger;
-        
         private readonly Dictionary<QueueType, CloudQueue> _queues = new Dictionary<QueueType, CloudQueue>();
 
         public bool IsDequeueBlocking => false;
 
-        public AzureStorageQueueProvider(string connectionString, ILoggerFactory logFactory)
+        public AzureStorageQueueProvider(string connectionString)
         {
-            _logger = logFactory.CreateLogger<AzureStorageQueueProvider>();
             var account = CloudStorageAccount.Parse(connectionString);
             var client = account.CreateCloudQueueClient();
 

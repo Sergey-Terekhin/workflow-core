@@ -4,6 +4,7 @@ using WorkflowCore.Models;
 using WorkflowCore.LockProviders.Redlock.Services;
 using System.Net;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions

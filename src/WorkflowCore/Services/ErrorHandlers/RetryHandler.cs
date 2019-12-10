@@ -5,12 +5,20 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.ErrorHandlers
 {
+    /// <summary>
+    /// Handles errors in steps with error handling policy set to <see cref="WorkflowErrorHandling.Retry"/>
+    /// </summary>
     public class RetryHandler : IWorkflowErrorHandler
     {
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly WorkflowOptions _options;
+
+        /// <inheritdoc />
         public WorkflowErrorHandling Type => WorkflowErrorHandling.Retry;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public RetryHandler(IDateTimeProvider datetimeProvider, WorkflowOptions options)
         {
             _datetimeProvider = datetimeProvider;

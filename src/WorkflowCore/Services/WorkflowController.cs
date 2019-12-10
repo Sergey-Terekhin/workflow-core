@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Exceptions;
@@ -8,8 +7,13 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
 
+// ReSharper disable InconsistentNaming
+
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowController"/>
+    /// </summary>
     public class WorkflowController : IWorkflowController
     {
         private readonly IPersistenceProvider _persistenceStore;
@@ -20,7 +24,17 @@ namespace WorkflowCore.Services
         private readonly ILifeCycleEventHub _eventHub;
         private readonly ILogger _logger;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
+        /// <summary>
+        /// ctor
+        /// </summary>
+        public WorkflowController(
+            IPersistenceProvider persistenceStore,
+            IDistributedLockProvider lockProvider,
+            IWorkflowRegistry registry,
+            IQueueProvider queueProvider,
+            IExecutionPointerFactory pointerFactory,
+            ILifeCycleEventHub eventHub,
+            ILoggerFactory loggerFactory)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
@@ -32,29 +46,29 @@ namespace WorkflowCore.Services
         }
 
         /// <inheritdoc />
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference = null)
         {
             return StartWorkflow(workflowId, null, data, reference);
         }
 
         /// <inheritdoc />
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference = null)
         {
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
 
         /// <inheritdoc />
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null) 
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference = null)
             where TData : class, new()
         {
             return StartWorkflow(workflowId, null, data, reference);
         }
 
         /// <inheritdoc />
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null,
+            string reference = null)
             where TData : class, new()
         {
-
             var def = _registry.GetDefinition(workflowId, version);
             if (def == null)
             {
@@ -75,10 +89,10 @@ namespace WorkflowCore.Services
 
             if (def.DataType != null && data == null)
             {
-                if (typeof(TData) == def.DataType)
-                    wf.Data = new TData();
-                else
-                    wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
+                wf.Data = typeof(TData) == def.DataType
+                    ? new TData()
+                    : def.DataType.GetConstructor(new Type[0])?.Invoke(new object[0]) 
+                      ?? throw new InvalidOperationException($"Unable to find default public constructor for type {def.DataType}");
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
@@ -97,10 +111,11 @@ namespace WorkflowCore.Services
         }
 
         /// <inheritdoc />
-        public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
+        public async Task PublishEvent(string eventName, string eventKey, object eventData,
+            DateTime? effectiveDate = null)
         {
             _logger.LogDebug(
-                WellKnownLoggingEventIds.EventCreateNew ,
+                WellKnownLoggingEventIds.EventCreateNew,
                 "Creating event {EventName} {EventKey}",
                 eventName, eventKey);
 
@@ -112,7 +127,7 @@ namespace WorkflowCore.Services
                 EventName = eventName,
                 IsProcessed = false
             };
-            
+
             string eventId = await _persistenceStore.CreateEvent(evt);
 
             await _queueProvider.QueueWork(eventId, QueueType.Event);
@@ -121,7 +136,7 @@ namespace WorkflowCore.Services
         /// <inheritdoc />
         public async Task<bool> SuspendWorkflow(string workflowId)
         {
-            if (!await _lockProvider.AcquireLock(workflowId, new CancellationToken()))
+            if (!await _lockProvider.AcquireLock(workflowId))
                 return false;
 
             try
@@ -153,7 +168,7 @@ namespace WorkflowCore.Services
         /// <inheritdoc />
         public async Task<bool> ResumeWorkflow(string workflowId)
         {
-            if (!await _lockProvider.AcquireLock(workflowId, new CancellationToken()))
+            if (!await _lockProvider.AcquireLock(workflowId))
             {
                 return false;
             }
@@ -191,7 +206,7 @@ namespace WorkflowCore.Services
         /// <inheritdoc />
         public async Task<bool> TerminateWorkflow(string workflowId)
         {
-            if (!await _lockProvider.AcquireLock(workflowId, new CancellationToken()))
+            if (!await _lockProvider.AcquireLock(workflowId))
             {
                 return false;
             }

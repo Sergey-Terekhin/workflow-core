@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using WorkflowCore.Persistence.EntityFramework;
+// ReSharper disable RedundantArgumentDefaultValue
+// ReSharper disable UnusedMember.Global
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Providers.Redis.Services;
 using WorkflowCore.UnitTests;
@@ -18,7 +17,7 @@ namespace WorkflowCore.Tests.Redis
             {
                 if (_subject == null)
                 {
-                    var client = new RedisPersistenceProvider(RedisDockerSetup.ConnectionString, "test", new LoggerFactory());
+                    var client = new RedisPersistenceProvider(RedisDockerSetup.ConnectionString, "test");
                     client.EnsureStoreExists();
                     _subject = client;
                 }

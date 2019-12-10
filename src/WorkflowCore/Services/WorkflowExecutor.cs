@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowExecutor"/>
+    /// </summary>
     public sealed class WorkflowExecutor : IWorkflowExecutor
     {
         private readonly IWorkflowRegistry _registry;
@@ -22,6 +26,9 @@ namespace WorkflowCore.Services
 
         private readonly IWorkflowHost _host;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public WorkflowExecutor(
             IWorkflowHost host, 
             IWorkflowRegistry registry,

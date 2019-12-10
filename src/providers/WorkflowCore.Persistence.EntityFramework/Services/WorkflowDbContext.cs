@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WorkflowCore.Persistence.EntityFramework.Models;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {

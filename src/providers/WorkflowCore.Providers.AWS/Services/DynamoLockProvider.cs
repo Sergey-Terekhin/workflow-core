@@ -15,7 +15,7 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly ILogger _logger;
         private readonly IAmazonDynamoDB _client;
         private readonly string _tableName;
-        private readonly string _nodeId;    
+        private readonly string _nodeId;
         private readonly long _ttl = 30000;
         private readonly int _heartbeat = 10000;
         private readonly long _jitter = 1000;
@@ -24,7 +24,8 @@ namespace WorkflowCore.Providers.AWS.Services
         private CancellationTokenSource _cancellationTokenSource;
         private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
 
-        public DynamoLockProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName, ILoggerFactory logFactory)
+        public DynamoLockProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName,
+            ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<DynamoLockProvider>();
             _client = new AmazonDynamoDBClient(credentials, config);
@@ -33,7 +34,7 @@ namespace WorkflowCore.Providers.AWS.Services
             _nodeId = Guid.NewGuid().ToString();
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken token)
+        public async Task<bool> AcquireLock(string id, CancellationToken token)
         {
             try
             {
@@ -42,51 +43,56 @@ namespace WorkflowCore.Providers.AWS.Services
                     TableName = _tableName,
                     Item = new Dictionary<string, AttributeValue>
                     {
-                        { "id", new AttributeValue(Id) },
-                        { "lock_owner", new AttributeValue(_nodeId) },
-                        { "expires", new AttributeValue()
+                        {"id", new AttributeValue(id)},
+                        {"lock_owner", new AttributeValue(_nodeId)},
+                        {
+                            "expires", new AttributeValue()
                             {
-                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
+                                N = Convert.ToString(
+                                    new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
                             }
                         }
                     },
                     ConditionExpression = "attribute_not_exists(id) OR (expires < :expired)",
                     ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                     {
-                        { ":expired", new AttributeValue()
+                        {
+                            ":expired", new AttributeValue()
                             {
-                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _jitter)
+                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() +
+                                                     _jitter)
                             }
                         }
                     }
                 };
 
-                var response = await _client.PutItemAsync(req, _cancellationTokenSource.Token);                                
+                var response = await _client.PutItemAsync(req, _cancellationTokenSource.Token);
 
                 if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    _localLocks.Add(Id);
+                    _localLocks.Add(id);
                     return true;
                 }
             }
             catch (ConditionalCheckFailedException)
             {
             }
+
             return false;
         }
 
-        public async Task ReleaseLock(string Id)
+        public async Task ReleaseLock(string id)
         {
             _mutex.WaitOne();
             try
             {
-                _localLocks.Remove(Id);
+                _localLocks.Remove(id);
             }
             finally
             {
                 _mutex.Set();
             }
-            
+
             try
             {
                 var req = new DeleteItemRequest()
@@ -94,19 +100,18 @@ namespace WorkflowCore.Providers.AWS.Services
                     TableName = _tableName,
                     Key = new Dictionary<string, AttributeValue>
                     {
-                        { "id", new AttributeValue(Id) }
+                        {"id", new AttributeValue(id)}
                     },
                     ConditionExpression = "lock_owner = :nodeId",
                     ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                     {
-                        { ":nodeId", new AttributeValue(_nodeId) }
+                        {":nodeId", new AttributeValue(_nodeId)}
                     }
-
                 };
                 await _client.DeleteItemAsync(req);
             }
             catch (ConditionalCheckFailedException)
-            {     
+            {
             }
         }
 
@@ -139,51 +144,53 @@ namespace WorkflowCore.Providers.AWS.Services
                 try
                 {
                     await Task.Delay(_heartbeat, _cancellationTokenSource.Token);
-                    if (_mutex.WaitOne())
+                    if (!_mutex.WaitOne()) 
+                        continue;
+                    
+                    try
                     {
-                        try
+                        foreach (var item in _localLocks.ToArray())
                         {
-                            foreach (var item in _localLocks.ToArray())
+                            var req = new PutItemRequest
                             {
-                                var req = new PutItemRequest
+                                TableName = _tableName,
+                                Item = new Dictionary<string, AttributeValue>
                                 {
-                                    TableName = _tableName,
-                                    Item = new Dictionary<string, AttributeValue>
+                                    {"id", new AttributeValue(item)},
+                                    {"lock_owner", new AttributeValue(_nodeId)},
                                     {
-                                        { "id", new AttributeValue(item) },
-                                        { "lock_owner", new AttributeValue(_nodeId) },
-                                        { "expires", new AttributeValue()
-                                            {
-                                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
-                                            }
+                                        "expires", new AttributeValue()
+                                        {
+                                            N = Convert.ToString(
+                                                new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
                                         }
-                                    },
-                                    ConditionExpression = "lock_owner = :nodeId",
-                                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                                    {
-                                        { ":nodeId", new AttributeValue(_nodeId) }
                                     }
-                                };
+                                },
+                                ConditionExpression = "lock_owner = :nodeId",
+                                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                                {
+                                    {":nodeId", new AttributeValue(_nodeId)}
+                                }
+                            };
 
-                                try
-                                {
-                                    await _client.PutItemAsync(req, _cancellationTokenSource.Token);
-                                }
-                                catch (ConditionalCheckFailedException)
-                                {
-                                    _logger.LogWarning($"Lock not owned anymore when sending heartbeat for {item}");
-                                }
+                            try
+                            {
+                                await _client.PutItemAsync(req, _cancellationTokenSource.Token);
+                            }
+                            catch (ConditionalCheckFailedException)
+                            {
+                                _logger.LogWarning("Lock not owned anymore when sending heartbeat for {Item}", item);
                             }
                         }
-                        finally
-                        {
-                            _mutex.Set();
-                        }
+                    }
+                    finally
+                    {
+                        _mutex.Set();
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(default(EventId), ex, ex.Message);
+                    _logger.LogError(default(EventId), ex, "Error while sending heartbeats");
                 }
             }
         }
@@ -192,7 +199,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             try
             {
-                var poll = await _client.DescribeTableAsync(_tableName);
+                await _client.DescribeTableAsync(_tableName);
             }
             catch (ResourceNotFoundException)
             {
@@ -214,7 +221,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 BillingMode = BillingMode.PAY_PER_REQUEST
             };
 
-            var createResponse = await _client.CreateTableAsync(createRequest);
+            await _client.CreateTableAsync(createRequest);
 
             int i = 0;
             bool created = false;

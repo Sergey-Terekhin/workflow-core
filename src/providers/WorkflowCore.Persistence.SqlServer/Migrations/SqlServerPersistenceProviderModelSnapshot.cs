@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using WorkflowCore.Persistence.EntityFramework;
+// ReSharper disable PartialTypeWithSinglePart
+// ReSharper disable UnusedMember.Global
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {

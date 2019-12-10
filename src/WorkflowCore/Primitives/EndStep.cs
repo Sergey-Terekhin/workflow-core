@@ -1,8 +1,12 @@
 ﻿using System;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Primitives
 {
+    /// <summary>
+    /// Last step in workflow 
+    /// </summary>
     public class EndStep : WorkflowStep
     {
         /// <inheritdoc />

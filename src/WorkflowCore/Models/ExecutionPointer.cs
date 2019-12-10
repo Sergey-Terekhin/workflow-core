@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
+    /// <inheritdoc />
     public class ExecutionPointer : IExecutionPointer
     {
         private IReadOnlyCollection<string> _scope = new List<string>();
@@ -83,16 +85,46 @@ namespace WorkflowCore.Models
         }
     }
 
+    /// <summary>
+    /// Statuses of execution pointer
+    /// </summary>
     public enum PointerStatus
     {
+        /// <summary>
+        /// Legacy status. Not used
+        /// </summary>
         Legacy = 0,
+        /// <summary>
+        /// Waiting for execution
+        /// </summary>
         Pending = 1,
+        /// <summary>
+        /// Execution is in progress
+        /// </summary>
         Running = 2,
+        /// <summary>
+        /// Execution was completed successfully
+        /// </summary>
         Complete = 3,
+        /// <summary>
+        /// Pause for specific interval is requested
+        /// </summary>
         Sleeping = 4,
+        /// <summary>
+        /// Execution is suspended until specified event is received
+        /// </summary>
         WaitingForEvent = 5,
+        /// <summary>
+        /// Execution was failed because of error
+        /// </summary>
         Failed = 6,
+        /// <summary>
+        /// Execution was compensated
+        /// </summary>
         Compensated = 7,
+        /// <summary>
+        /// Execution was cancelled
+        /// </summary>
         Cancelled = 8
     }
 }

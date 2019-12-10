@@ -9,7 +9,6 @@ namespace WorkflowCore.Models
         public string WorkflowId { get; set; }
 
         public int StepId { get; set; }
-
         public string EventName { get; set; }
 
         public string EventKey { get; set; }

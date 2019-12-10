@@ -3,8 +3,15 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="IStepOutcomeBuilder{TData}"/>
+    /// </summary>
+    /// <typeparam name="TData">Type of workflow data</typeparam>
     public class StepOutcomeBuilder<TData> : IStepOutcomeBuilder<TData>
     {
         /// <inheritdoc />
@@ -13,6 +20,9 @@ namespace WorkflowCore.Services
         /// <inheritdoc />
         public StepOutcome Outcome { get; private set; }
         
+        /// <summary>
+        /// ctor
+        /// </summary>
         public StepOutcomeBuilder(IWorkflowBuilder<TData> workflowBuilder, StepOutcome outcome)
         {
             WorkflowBuilder = workflowBuilder;

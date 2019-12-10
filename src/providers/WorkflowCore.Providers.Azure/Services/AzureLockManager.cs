@@ -29,9 +29,9 @@ namespace WorkflowCore.Providers.Azure.Services
             _client = account.CreateCloudBlobClient();
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken token)
+        public async Task<bool> AcquireLock(string id, CancellationToken token)
         {
-            var blob = _container.GetBlockBlobReference(Id);
+            var blob = _container.GetBlockBlobReference(id);
 
             if (!await blob.ExistsAsync())
                 await blob.UploadTextAsync(string.Empty);
@@ -41,12 +41,12 @@ namespace WorkflowCore.Providers.Azure.Services
                 try
                 {
                     var leaseId = await blob.AcquireLeaseAsync(LockTimeout);
-                    _locks.Add(new ControlledLock(Id, leaseId, blob));                    
+                    _locks.Add(new ControlledLock(id, leaseId, blob));                    
                     return true;
                 }
                 catch (StorageException ex)
                 {
-                    _logger.LogDebug($"Failed to acquire lock {Id} - {ex.Message}");
+                    _logger.LogDebug(ex, "Failed to acquire lock {Id}", id);
                     return false;
                 }
                 finally
@@ -57,13 +57,13 @@ namespace WorkflowCore.Providers.Azure.Services
             return false;
         }
 
-        public async Task ReleaseLock(string Id)
+        public async Task ReleaseLock(string id)
         {
             if (_mutex.WaitOne())
             {
                 try
                 {
-                    var entry = _locks.FirstOrDefault(x => x.Id == Id);
+                    var entry = _locks.FirstOrDefault(x => x.Id == id);
 
                     if (entry != null)
                     {
@@ -73,7 +73,7 @@ namespace WorkflowCore.Providers.Azure.Services
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError($"Error releasing lock - {ex.Message}");
+                            _logger.LogError(ex, "Failed to release lock {Id}", id);
                         }                        
                         _locks.Remove(entry);
                     }
@@ -92,13 +92,14 @@ namespace WorkflowCore.Providers.Azure.Services
             _renewTimer = new Timer(RenewLeases, null, RenewInterval, RenewInterval);
         }
 
-        public async Task Stop()
+        public Task Stop()
         {
             if (_renewTimer == null)
-                return;
+                return Task.CompletedTask;
 
             _renewTimer.Dispose();
             _renewTimer = null;
+            return Task.CompletedTask;
         }
 
         private async void RenewLeases(object state)
@@ -113,7 +114,7 @@ namespace WorkflowCore.Providers.Azure.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error renewing leases - {ex.Message}");
+                    _logger.LogError(ex, "Error renewing leases");
                 }
                 finally
                 {
@@ -130,7 +131,7 @@ namespace WorkflowCore.Providers.Azure.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error renewing lease - {ex.Message}");
+                _logger.LogError(ex, "Error renewing lease {LeaseId}", entry.LeaseId);
             }
         }
     }

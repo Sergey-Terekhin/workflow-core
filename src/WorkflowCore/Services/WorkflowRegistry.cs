@@ -4,14 +4,22 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowRegistry"/>
+    /// </summary>
     public class WorkflowRegistry : IWorkflowRegistry
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly List<Tuple<string, int, WorkflowDefinition>> _registry = new List<Tuple<string, int, WorkflowDefinition>>();
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="serviceProvider">Instance of service container</param>
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;

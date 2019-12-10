@@ -7,6 +7,8 @@ using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Primitives;
 using WorkflowCore.Services.BackgroundTasks;
 using WorkflowCore.Services.ErrorHandlers;
+// ReSharper disable CheckNamespace
+// ReSharper disable RedundantTypeArgumentsOfMethod
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -20,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             var options = new WorkflowOptions(services);
             setupAction?.Invoke(options);
             services.AddSingleton<ISingletonMemoryProvider, MemoryPersistenceProvider>();
-            services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
+            services.AddTransient<IPersistenceProvider>(options.PersistenceFactory);
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<ILifeCycleEventHub>(options.EventHubFactory);

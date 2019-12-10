@@ -24,12 +24,12 @@ namespace WorkflowCore.LockProviders.SqlServer
             var csb = new SqlConnectionStringBuilder(connectionString);
             csb.Pooling = true;
             csb.ApplicationName = "Workflow Core Lock Manager";
-            
+
             _connectionString = csb.ToString();
         }
 
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken token)
+        public async Task<bool> AcquireLock(string id, CancellationToken token)
         {
             if (_mutex.WaitOne())
             {
@@ -42,7 +42,7 @@ namespace WorkflowCore.LockProviders.SqlServer
                         var cmd = connection.CreateCommand();
                         cmd.CommandText = "sp_getapplock";
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Resource", $"{Prefix}:{Id}");
+                        cmd.Parameters.AddWithValue("@Resource", $"{Prefix}:{id}");
                         cmd.Parameters.AddWithValue("@LockOwner", $"Session");
                         cmd.Parameters.AddWithValue("@LockMode", $"Exclusive");
                         cmd.Parameters.AddWithValue("@LockTimeout", 0);
@@ -54,21 +54,22 @@ namespace WorkflowCore.LockProviders.SqlServer
                         switch (result)
                         {
                             case -1:
-                                _logger.LogDebug($"The lock request timed out for {Id}");
+                                _logger.LogDebug("The lock request timed out for {Id}", id);
                                 break;
                             case -2:
-                                _logger.LogDebug($"The lock request was canceled for {Id}");
+                                _logger.LogDebug("The lock request was canceled for {Id}", id);
                                 break;
                             case -3:
-                                _logger.LogDebug($"The lock request was chosen as a deadlock victim for {Id}");
+                                _logger.LogDebug("The lock request was chosen as a deadlock victim for {Id}", id);
                                 break;
                             case -999:
-                                _logger.LogError($"Lock provider error for {Id}");
+                                _logger.LogError("Lock provider error for {Id}", id);
                                 break;
                         }
+
                         if (result >= 0)
                         {
-                            _locks[Id] = connection;
+                            _locks[id] = connection;
                             return true;
                         }
                         else
@@ -77,10 +78,10 @@ namespace WorkflowCore.LockProviders.SqlServer
                             return false;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         connection.Close();
-                        throw ex;
+                        throw;
                     }
                 }
                 finally
@@ -88,17 +89,17 @@ namespace WorkflowCore.LockProviders.SqlServer
                     _mutex.Set();
                 }
             }
+
             return false;
         }
 
-        public async Task ReleaseLock(string Id)
+        public async Task ReleaseLock(string id)
         {
             if (_mutex.WaitOne())
             {
                 try
                 {
-                    SqlConnection connection = null;
-                    connection = _locks[Id];
+                    var connection = _locks[id];
 
                     if (connection == null)
                         return;
@@ -108,7 +109,7 @@ namespace WorkflowCore.LockProviders.SqlServer
                         var cmd = connection.CreateCommand();
                         cmd.CommandText = "sp_releaseapplock";
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Resource", $"{Prefix}:{Id}");
+                        cmd.Parameters.AddWithValue("@Resource", $"{Prefix}:{id}");
                         cmd.Parameters.AddWithValue("@LockOwner", $"Session");
                         var returnParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
                         returnParameter.Direction = ParameterDirection.ReturnValue;
@@ -117,12 +118,12 @@ namespace WorkflowCore.LockProviders.SqlServer
                         var result = Convert.ToInt32(returnParameter.Value);
 
                         if (result < 0)
-                            _logger.LogError($"Unable to release lock for {Id}");
+                            _logger.LogError("Unable to release lock for {Id}", id);
                     }
                     finally
                     {
                         connection.Close();
-                        _locks.Remove(Id);
+                        _locks.Remove(id);
                     }
                 }
                 finally
@@ -132,12 +133,8 @@ namespace WorkflowCore.LockProviders.SqlServer
             }
         }
 
-        public async Task Start()
-        {         
-        }
+        public Task Start()=> Task.CompletedTask;
 
-        public async Task Stop()
-        {
-        }
+        public Task Stop() => Task.CompletedTask;
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+// ReSharper disable UnusedMember.Global
+// ReSharper disable RedundantArgumentDefaultValue
 
 namespace WorkflowCore.Persistence.MySQL.Migrations
 {

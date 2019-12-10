@@ -12,6 +12,9 @@ namespace WorkflowCore.Services
         private readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public CancellationProcessor(IExecutionResultProcessor executionResultProcessor, ILoggerFactory logFactory)
         {
             _executionResultProcessor = executionResultProcessor;

@@ -6,7 +6,6 @@ using Amazon;
 using Amazon.Kinesis;
 using Amazon.Kinesis.Model;
 using Amazon.Runtime;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WorkflowCore.Interface;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -16,7 +15,6 @@ namespace WorkflowCore.Providers.AWS.Services
 {
     public class KinesisProvider : ILifeCycleEventHub
     {
-        private readonly ILogger _logger;
         private Queue<Action<LifeCycleEvent>> _deferredSubscribers = new Queue<Action<LifeCycleEvent>>();
         private readonly string _streamName;
         private readonly string _appName;
@@ -24,11 +22,10 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly IKinesisStreamConsumer _consumer;
         private readonly AmazonKinesisClient _client;
         private readonly int _defaultShardCount = 1;
-        private bool _started = false;
+        private bool _started;
 
-        public KinesisProvider(AWSCredentials credentials, RegionEndpoint region, string appName, string streamName, IKinesisStreamConsumer consumer, ILoggerFactory logFactory)
+        public KinesisProvider(AWSCredentials credentials, RegionEndpoint region, string appName, string streamName, IKinesisStreamConsumer consumer)
         {
-            _logger = logFactory.CreateLogger(GetType());
             _appName = appName;
             _streamName = streamName;
             _consumer = consumer;
@@ -45,7 +42,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 _serializer.Serialize(writer, evt);
                 writer.Flush();
 
-                var response = await _client.PutRecordAsync(new PutRecordRequest()
+                await _client.PutRecordAsync(new PutRecordRequest
                 {
                     StreamName = _streamName,
                     PartitionKey = evt.WorkflowInstanceId,
@@ -103,7 +100,7 @@ namespace WorkflowCore.Providers.AWS.Services
             }
         }
 
-        private async Task<string> CreateStream()
+        private async Task CreateStream()
         {
             await _client.CreateStreamAsync(new CreateStreamRequest()
             {
@@ -121,8 +118,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     StreamName = _streamName
                 });
                 
-                if (poll.StreamDescriptionSummary.StreamStatus == StreamStatus.ACTIVE)
-                    return poll.StreamDescriptionSummary.StreamARN;
+                if (poll.StreamDescriptionSummary.StreamStatus == StreamStatus.ACTIVE) return;
             }
 
             throw new TimeoutException();

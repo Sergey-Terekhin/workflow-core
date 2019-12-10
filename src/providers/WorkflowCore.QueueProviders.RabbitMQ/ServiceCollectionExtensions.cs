@@ -3,6 +3,8 @@ using System;
 using System.Linq;
 using WorkflowCore.Models;
 using WorkflowCore.QueueProviders.RabbitMQ.Services;
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMember.Global
 
 namespace Microsoft.Extensions.DependencyInjection
 {

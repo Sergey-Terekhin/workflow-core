@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using RedLockNet;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
@@ -13,31 +12,29 @@ namespace WorkflowCore.Providers.Redis.Services
 {
     public class RedisLockProvider : IDistributedLockProvider
     {
-        private readonly ILogger _logger;        
         private readonly string _connectionString;        
         private IConnectionMultiplexer _multiplexer;
         private RedLockFactory _redlockFactory;
         private readonly TimeSpan _lockTimeout = TimeSpan.FromMinutes(1);
-        private readonly List<IRedLock> ManagedLocks = new List<IRedLock>();
+        private readonly List<IRedLock> _managedLocks = new List<IRedLock>();
 
-        public RedisLockProvider(string connectionString, ILoggerFactory logFactory)
+        public RedisLockProvider(string connectionString)
         {
             _connectionString = connectionString;
-            _logger = logFactory.CreateLogger(GetType());
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken token)
+        public async Task<bool> AcquireLock(string id, CancellationToken token)
         {
             if (_redlockFactory == null)
                 throw new InvalidOperationException();
 
-            var redLock = await _redlockFactory.CreateLockAsync(Id, _lockTimeout);
+            var redLock = await _redlockFactory.CreateLockAsync(id, _lockTimeout);
 
             if (redLock.IsAcquired)
             {
-                lock (ManagedLocks)
+                lock (_managedLocks)
                 {
-                    ManagedLocks.Add(redLock);
+                    _managedLocks.Add(redLock);
                 }
                 return true;
             }
@@ -45,19 +42,19 @@ namespace WorkflowCore.Providers.Redis.Services
             return false;
         }
 
-        public Task ReleaseLock(string Id)
+        public Task ReleaseLock(string id)
         {
             if (_redlockFactory == null)
                 throw new InvalidOperationException();
 
-            lock (ManagedLocks)
+            lock (_managedLocks)
             {
-                foreach (var redLock in ManagedLocks)
+                foreach (var redLock in _managedLocks)
                 {
-                    if (redLock.Resource == Id)
+                    if (redLock.Resource == id)
                     {
                         redLock.Dispose();
-                        ManagedLocks.Remove(redLock);
+                        _managedLocks.Remove(redLock);
                         break;
                     }
                 }

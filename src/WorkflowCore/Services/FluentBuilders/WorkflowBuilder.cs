@@ -4,15 +4,31 @@ using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowBuilder"/>
+    /// </summary>
     public class WorkflowBuilder : IWorkflowBuilder
     {
+        /// <summary>
+        /// List of workflow steps to execute
+        /// </summary>
         protected List<WorkflowStep> Steps { get; set; } = new List<WorkflowStep>();
 
+        /// <summary>
+        /// Default value of error handling policy. It's applied if policy is not specified for concrete workflow step
+        /// </summary>
         protected WorkflowErrorHandling DefaultErrorBehavior = WorkflowErrorHandling.Retry;
 
+        
+        /// <summary>
+        /// Default value of retry interval. It's applied if effective error handling policy is set to <see cref="WorkflowErrorHandling.Retry"/>
+        /// and Retry Interval is not specified for concrete workflow step
+        /// </summary>
         protected TimeSpan? DefaultErrorRetryInterval;
 
         /// <inheritdoc />
@@ -62,9 +78,13 @@ namespace WorkflowCore.Services
 
     }
 
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowBuilder{TData}"/>
+    /// </summary>
+    /// <typeparam name="TData">Type of workflow data</typeparam>
     public class WorkflowBuilder<TData> : WorkflowBuilder, IWorkflowBuilder<TData>
     {
-
+        /// <inheritdoc />
         public override WorkflowDefinition Build(string id, int version)
         {
             var result = base.Build(id, version);
@@ -72,9 +92,13 @@ namespace WorkflowCore.Services
             return result;
         }
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="steps">workflow steps</param>
         public WorkflowBuilder(IEnumerable<WorkflowStep> steps)
         {
-            this.Steps.AddRange(steps);
+            Steps.AddRange(steps);
         }
 
         /// <inheritdoc />
@@ -112,7 +136,7 @@ namespace WorkflowCore.Services
         }
 
         /// <inheritdoc />
-        public IEnumerable<WorkflowStep> GetUpstreamSteps(int id)
+        public IReadOnlyList<WorkflowStep> GetUpstreamSteps(int id)
         {
             return Steps.Where(x => x.Outcomes.Any(y => y.NextStep == id)).ToList();
         }

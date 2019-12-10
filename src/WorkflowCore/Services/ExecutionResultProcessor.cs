@@ -14,6 +14,9 @@ namespace WorkflowCore.Services
         private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IEnumerable<IWorkflowErrorHandler> _errorHandlers;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public ExecutionResultProcessor(
             IExecutionPointerFactory pointerFactory, 
             IDateTimeProvider datetimeProvider,

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using WorkflowCore.Interface;
 
@@ -10,7 +9,6 @@ namespace WorkflowCore.Providers.Redis.Services
 {
     public class RedisQueueProvider : IQueueProvider
     {
-        private readonly ILogger _logger;
         private readonly string _connectionString;
         private readonly string _prefix;
 
@@ -23,11 +21,10 @@ namespace WorkflowCore.Providers.Redis.Services
             [QueueType.Event] = "events",
         };
 
-        public RedisQueueProvider(string connectionString, string prefix, ILoggerFactory logFactory)
+        public RedisQueueProvider(string connectionString, string prefix)
         {
             _connectionString = connectionString;
             _prefix = prefix;
-            _logger = logFactory.CreateLogger(GetType());
         }
         
         public async Task QueueWork(string id, QueueType queue)
@@ -35,6 +32,7 @@ namespace WorkflowCore.Providers.Redis.Services
             if (_redis == null)
                 throw new InvalidOperationException();
 
+            // ReSharper disable once RedundantArgumentDefaultValue
             await _redis.ListRightPushAsync(GetQueueName(queue), id, When.Always);
         }
 

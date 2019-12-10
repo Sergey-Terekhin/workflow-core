@@ -4,6 +4,9 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
+    /// <summary>
+    /// Base implementation of step body which executes synchronously 
+    /// </summary>
     public abstract class StepBody : IStepBody
     {
         /// <summary>

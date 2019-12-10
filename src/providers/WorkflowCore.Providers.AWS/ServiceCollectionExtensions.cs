@@ -8,6 +8,8 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Providers.AWS.Interface;
 using WorkflowCore.Providers.AWS.Services;
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMember.Global
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UseAwsSimpleQueueService(this WorkflowOptions options, AWSCredentials credentials, AmazonSQSConfig config)
         {
-            options.UseQueueProvider(sp => new SQSQueueProvider(credentials, config, sp.GetService<ILoggerFactory>()));
+            options.UseQueueProvider(sp => new SqsQueueProvider(credentials, config));
             return options;
         }
 
@@ -28,15 +30,15 @@ namespace Microsoft.Extensions.DependencyInjection
         public static WorkflowOptions UseAwsDynamoPersistence(this WorkflowOptions options, AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix)
         {
             options.Services.AddTransient<IDynamoDbProvisioner>(sp => new DynamoDbProvisioner(credentials, config, tablePrefix, sp.GetService<ILoggerFactory>()));
-            options.UsePersistence(sp => new DynamoPersistenceProvider(credentials, config, sp.GetService<IDynamoDbProvisioner>(), tablePrefix, sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new DynamoPersistenceProvider(credentials, config, sp.GetService<IDynamoDbProvisioner>(), tablePrefix));
             return options;
         }
 
         public static WorkflowOptions UseAwsKinesis(this WorkflowOptions options, AWSCredentials credentials, RegionEndpoint region, string appName, string streamName)
         {
-            options.Services.AddTransient<IKinesisTracker>(sp => new KinesisTracker(credentials, region, "workflowcore_kinesis", sp.GetService<ILoggerFactory>()));
+            options.Services.AddTransient<IKinesisTracker>(sp => new KinesisTracker(credentials, region, "workflowcore_kinesis"));
             options.Services.AddTransient<IKinesisStreamConsumer>(sp => new KinesisStreamConsumer(credentials, region, sp.GetService<IKinesisTracker>(), sp.GetService<IDistributedLockProvider>(), sp.GetService<ILoggerFactory>()));
-            options.UseEventHub(sp => new KinesisProvider(credentials, region, appName, streamName, sp.GetService<IKinesisStreamConsumer>(), sp.GetService<ILoggerFactory>()));
+            options.UseEventHub(sp => new KinesisProvider(credentials, region, appName, streamName, sp.GetService<IKinesisStreamConsumer>()));
             return options;
         }
     }

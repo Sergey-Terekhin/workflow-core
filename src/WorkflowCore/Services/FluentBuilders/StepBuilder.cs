@@ -5,9 +5,17 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 
+// ReSharper disable once CheckNamespace
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody, TStepBody>
+    /// <summary>
+    /// Step builder implementation
+    /// </summary>
+    /// <typeparam name="TData">Type of workflow data</typeparam>
+    /// <typeparam name="TStepBody">Type of step body</typeparam>
+    public class StepBuilder<TData, TStepBody> : 
+        IStepBuilder<TData, TStepBody>, 
+        IContainerStepBuilder<TData, TStepBody, TStepBody>
         where TStepBody : IStepBody
     {
         /// <inheritdoc />
@@ -16,6 +24,11 @@ namespace WorkflowCore.Services
         /// <inheritdoc />
         public WorkflowStep<TStepBody> Step { get; set; }
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="workflowBuilder">Parent builder</param>
+        /// <param name="step">Workflow step</param>
         public StepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step)
         {
             WorkflowBuilder = workflowBuilder;
@@ -427,7 +440,6 @@ namespace WorkflowCore.Services
             WorkflowStepInline newStep = new WorkflowStepInline();
             newStep.Body = body;
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
             Step.CompensationStepId = newStep.Id;
             return this;
         }

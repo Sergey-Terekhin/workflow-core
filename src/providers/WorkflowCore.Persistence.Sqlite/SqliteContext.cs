@@ -12,7 +12,6 @@ namespace WorkflowCore.Persistence.Sqlite
         private readonly string _connectionString;
 
         public SqliteContext(string connectionString)
-            : base()
         {
             _connectionString = connectionString;
         }

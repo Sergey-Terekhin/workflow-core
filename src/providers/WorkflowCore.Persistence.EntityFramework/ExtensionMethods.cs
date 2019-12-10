@@ -33,48 +33,48 @@ namespace WorkflowCore.Persistence.EntityFramework
             
             foreach (var ep in instance.ExecutionPointers)
             {
-                var persistedEP = persistable.ExecutionPointers.FindById(ep.Id);
+                var persistedPointer = persistable.ExecutionPointers.FindById(ep.Id);
                 
-                if (persistedEP == null)
+                if (persistedPointer == null)
                 {
-                    persistedEP = new PersistedExecutionPointer();
-                    persistedEP.Id = ep.Id ?? Guid.NewGuid().ToString();
-                    persistable.ExecutionPointers.Add(persistedEP);
+                    persistedPointer = new PersistedExecutionPointer();
+                    persistedPointer.Id = ep.Id ?? Guid.NewGuid().ToString();
+                    persistable.ExecutionPointers.Add(persistedPointer);
                 }                 
                 
-                persistedEP.StepId = ep.StepId;
-                persistedEP.Active = ep.Active;
-                persistedEP.SleepUntil = ep.SleepUntil;
-                persistedEP.PersistenceData = JsonConvert.SerializeObject(ep.PersistenceData, SerializerSettings);
-                persistedEP.StartTime = ep.StartTime;
-                persistedEP.EndTime = ep.EndTime;
-                persistedEP.StepName = ep.StepName;
-                persistedEP.RetryCount = ep.RetryCount;
-                persistedEP.PredecessorId = ep.PredecessorId;
-                persistedEP.ContextItem = JsonConvert.SerializeObject(ep.ContextItem, SerializerSettings);
-                persistedEP.Children = string.Empty;
+                persistedPointer.StepId = ep.StepId;
+                persistedPointer.Active = ep.Active;
+                persistedPointer.SleepUntil = ep.SleepUntil;
+                persistedPointer.PersistenceData = JsonConvert.SerializeObject(ep.PersistenceData, SerializerSettings);
+                persistedPointer.StartTime = ep.StartTime;
+                persistedPointer.EndTime = ep.EndTime;
+                persistedPointer.StepName = ep.StepName;
+                persistedPointer.RetryCount = ep.RetryCount;
+                persistedPointer.PredecessorId = ep.PredecessorId;
+                persistedPointer.ContextItem = JsonConvert.SerializeObject(ep.ContextItem, SerializerSettings);
+                persistedPointer.Children = string.Empty;
 
                 foreach (var child in ep.Children)
-                    persistedEP.Children += child + ";";
+                    persistedPointer.Children += child + ";";
 
-                persistedEP.EventName = ep.EventName;
-                persistedEP.EventKey = ep.EventKey;
-                persistedEP.EventPublished = ep.EventPublished;
-                persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
-                persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
-                persistedEP.Status = ep.Status;
+                persistedPointer.EventName = ep.EventName;
+                persistedPointer.EventKey = ep.EventKey;
+                persistedPointer.EventPublished = ep.EventPublished;
+                persistedPointer.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
+                persistedPointer.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
+                persistedPointer.Status = ep.Status;
 
-                persistedEP.Scope = string.Empty;
+                persistedPointer.Scope = string.Empty;
                 foreach (var item in ep.Scope)
-                    persistedEP.Scope += item + ";";
+                    persistedPointer.Scope += item + ";";
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
-                    var persistedAttr = persistedEP.ExtensionAttributes.FirstOrDefault(x => x.AttributeKey == attr.Key);
+                    var persistedAttr = persistedPointer.ExtensionAttributes.FirstOrDefault(x => x.AttributeKey == attr.Key);
                     if (persistedAttr == null)
                     {
                         persistedAttr = new PersistedExtensionAttribute();
-                        persistedEP.ExtensionAttributes.Add(persistedAttr);
+                        persistedPointer.ExtensionAttributes.Add(persistedAttr);
                     }
 
                     persistedAttr.AttributeKey = attr.Key;

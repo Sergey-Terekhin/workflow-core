@@ -6,21 +6,24 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.ErrorHandlers
 {
+    /// <summary>
+    /// Handles errors in steps with error handling policy set to <see cref="WorkflowErrorHandling.Compensate"/>
+    /// </summary>
     public class CompensateHandler : IWorkflowErrorHandler
     {
-        private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IDateTimeProvider _datetimeProvider;
-        private readonly WorkflowOptions _options;
 
+        /// <inheritdoc />
         public WorkflowErrorHandling Type => WorkflowErrorHandling.Compensate;
 
-        public CompensateHandler(IExecutionPointerFactory pointerFactory, ILifeCycleEventPublisher eventPublisher, IDateTimeProvider datetimeProvider, WorkflowOptions options)
+        /// <summary>
+        /// ctor
+        /// </summary>
+        public CompensateHandler(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider)
         {
             _pointerFactory = pointerFactory;
-            _eventPublisher = eventPublisher;
             _datetimeProvider = datetimeProvider;
-            _options = options;
         }
 
         /// <inheritdoc />

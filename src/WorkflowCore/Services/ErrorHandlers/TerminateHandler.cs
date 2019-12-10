@@ -6,12 +6,20 @@ using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services.ErrorHandlers
 {
+    /// <summary>
+    /// Handles errors in steps with error handling policy set to <see cref="WorkflowErrorHandling.Terminate"/>
+    /// </summary>
     public class TerminateHandler : IWorkflowErrorHandler
     {
         private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IDateTimeProvider _datetimeProvider;
+
+        /// <inheritdoc />
         public WorkflowErrorHandling Type => WorkflowErrorHandling.Terminate;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public TerminateHandler(ILifeCycleEventPublisher eventPublisher, IDateTimeProvider datetimeProvider)
         {
             _eventPublisher = eventPublisher;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+// ReSharper disable CheckNamespace
 
 namespace WorkflowCore.Services
 {

@@ -15,7 +15,8 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly IAmazonDynamoDB _client;
         private readonly string _tablePrefix;
 
-        public DynamoDbProvisioner(AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix, ILoggerFactory logFactory)
+        public DynamoDbProvisioner(AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix,
+            ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<DynamoDbProvisioner>();
             _client = new AmazonDynamoDBClient(credentials, config);
@@ -40,7 +41,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     {
                         new KeySchemaElement
                         {
-                            AttributeName= "runnable",
+                            AttributeName = "runnable",
                             KeyType = "HASH" //Partition key
                         }
                     },
@@ -63,10 +64,11 @@ namespace WorkflowCore.Providers.AWS.Services
                 }
             };
 
-            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", new List<KeySchemaElement>()
-            {
-                new KeySchemaElement("id", KeyType.HASH)
-            })
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}",
+                new List<KeySchemaElement>()
+                {
+                    new KeySchemaElement("id", KeyType.HASH)
+                })
             {
                 AttributeDefinitions = new List<AttributeDefinition>()
                 {
@@ -121,10 +123,11 @@ namespace WorkflowCore.Providers.AWS.Services
                 }
             };
 
-            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", new List<KeySchemaElement>()
-            {
-                new KeySchemaElement("id", KeyType.HASH)
-            })
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}",
+                new List<KeySchemaElement>()
+                {
+                    new KeySchemaElement("id", KeyType.HASH)
+                })
             {
                 AttributeDefinitions = new List<AttributeDefinition>()
                 {
@@ -156,7 +159,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     {
                         new KeySchemaElement
                         {
-                            AttributeName= "event_slug",
+                            AttributeName = "event_slug",
                             KeyType = "HASH" //Partition key
                         }
                     },
@@ -210,10 +213,11 @@ namespace WorkflowCore.Providers.AWS.Services
                 }
             };
 
-            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", new List<KeySchemaElement>()
-            {
-                new KeySchemaElement("id", KeyType.HASH)
-            })
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}",
+                new List<KeySchemaElement>()
+                {
+                    new KeySchemaElement("id", KeyType.HASH)
+                })
             {
                 AttributeDefinitions = new List<AttributeDefinition>()
                 {
@@ -245,14 +249,14 @@ namespace WorkflowCore.Providers.AWS.Services
             }
             catch (ResourceNotFoundException)
             {
-                _logger.LogWarning($"Provisioning DynamoDb table - {tableName}");
+                _logger.LogWarning("Provisioning DynamoDb table - {tableName}", tableName);
                 await createTask();
             }
         }
 
         private async Task CreateTable(CreateTableRequest createRequest)
         {
-            var createResponse = await _client.CreateTableAsync(createRequest);
+            await _client.CreateTableAsync(createRequest);
 
             int i = 0;
             bool created = false;
@@ -272,4 +276,3 @@ namespace WorkflowCore.Providers.AWS.Services
         }
     }
 }
-

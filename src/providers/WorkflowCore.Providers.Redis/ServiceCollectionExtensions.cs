@@ -2,6 +2,9 @@
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Models;
 using WorkflowCore.Providers.Redis.Services;
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMethodReturnValue.Global
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -9,19 +12,19 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UseRedisQueues(this WorkflowOptions options, string connectionString, string prefix)
         {
-            options.UseQueueProvider(sp => new RedisQueueProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            options.UseQueueProvider(sp => new RedisQueueProvider(connectionString, prefix));
             return options;
         }
 
         public static WorkflowOptions UseRedisLocking(this WorkflowOptions options, string connectionString)
         {
-            options.UseDistributedLockManager(sp => new RedisLockProvider(connectionString, sp.GetService<ILoggerFactory>()));
+            options.UseDistributedLockManager(sp => new RedisLockProvider(connectionString));
             return options;
         }
 
         public static WorkflowOptions UseRedisPersistence(this WorkflowOptions options, string connectionString, string prefix)
         {
-            options.UsePersistence(sp => new RedisPersistenceProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new RedisPersistenceProvider(connectionString, prefix));
             return options;
         }
 

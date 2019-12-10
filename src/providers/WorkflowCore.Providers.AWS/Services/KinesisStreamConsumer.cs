@@ -84,7 +84,7 @@ namespace WorkflowCore.Providers.AWS.Services
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogError(default(EventId), ex, ex.Message);
+                                    _logger.LogError(default(EventId), ex, "Error in processing subscription");
                                 }
                             }
 
@@ -104,7 +104,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(default(EventId), ex, ex.Message);
+                    _logger.LogError(default(EventId), ex, "Error in processing subscriptions list");
                 }
             }
         }

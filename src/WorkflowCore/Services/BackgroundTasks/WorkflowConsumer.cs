@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
@@ -18,7 +19,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, WorkflowOptions options)
+        public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStorePool = new DefaultObjectPool<IPersistenceProvider>(persistencePoolPolicy);

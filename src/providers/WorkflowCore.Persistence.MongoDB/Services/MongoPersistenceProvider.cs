@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
+// ReSharper disable InconsistentNaming
+
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
     public class MongoPersistenceProvider : IPersistenceProvider
@@ -65,24 +67,37 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             BsonClassMap.RegisterClassMap<SchedulePersistenceData>(x => x.AutoMap());
         }
 
-        static bool indexesCreated = false;
-        static void CreateIndexes(MongoPersistenceProvider instance)
+        private static bool _indexesCreated;
+
+        private static void CreateIndexes(MongoPersistenceProvider instance)
         {
-            if (!indexesCreated)
+            if (!_indexesCreated)
             {
-                instance.WorkflowInstances.Indexes.CreateOne(Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.NextExecution), new CreateIndexOptions() { Background = true, Name = "idx_nextExec" });
-                instance.Events.Indexes.CreateOne(Builders<Event>.IndexKeys.Ascending(x => x.IsProcessed), new CreateIndexOptions() { Background = true, Name = "idx_processed" });
-                indexesCreated = true;
+                var workflowKeys = Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.NextExecution);
+                var workflowOptions = new CreateIndexOptions() {Background = true, Name = "idx_nextExec"};
+                var workflowModel = new CreateIndexModel<WorkflowInstance>(workflowKeys, workflowOptions);
+                var createOneOptions = new CreateOneIndexOptions();
+                instance.WorkflowInstances.Indexes.CreateOne(workflowModel, createOneOptions);
+                
+                
+                var eventKeys = Builders<Event>.IndexKeys.Ascending(x => x.IsProcessed);
+                var eventOptions = new CreateIndexOptions() {Background = true, Name = "idx_processed"};
+                var eventModel = new CreateIndexModel<Event>(eventKeys, eventOptions);
+                instance.Events.Indexes.CreateOne(eventModel, createOneOptions);
+                _indexesCreated = true;
             }
         }
 
-        private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>("wfc.workflows");
+        private IMongoCollection<WorkflowInstance> WorkflowInstances =>
+            _database.GetCollection<WorkflowInstance>("wfc.workflows");
 
-        private IMongoCollection<EventSubscription> EventSubscriptions => _database.GetCollection<EventSubscription>("wfc.subscriptions");
+        private IMongoCollection<EventSubscription> EventSubscriptions =>
+            _database.GetCollection<EventSubscription>("wfc.subscriptions");
 
         private IMongoCollection<Event> Events => _database.GetCollection<Event>("wfc.events");
 
-        private IMongoCollection<ExecutionError> ExecutionErrors => _database.GetCollection<ExecutionError>("wfc.execution_errors");
+        private IMongoCollection<ExecutionError> ExecutionErrors =>
+            _database.GetCollection<ExecutionError>("wfc.execution_errors");
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
@@ -99,15 +114,16 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         {
             var now = asAt.ToUniversalTime().Ticks;
             var query = WorkflowInstances
-                .Find(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
+                .Find(x => x.NextExecution.HasValue && (x.NextExecution <= now) &&
+                           (x.Status == WorkflowStatus.Runnable))
                 .Project(x => x.Id);
 
             return await query.ToListAsync();
         }
 
-        public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
+        public async Task<WorkflowInstance> GetWorkflowInstance(string id)
         {
-            var result = await WorkflowInstances.FindAsync(x => x.Id == Id);
+            var result = await WorkflowInstances.FindAsync(x => x.Id == id);
             return await result.FirstAsync();
         }
 
@@ -120,25 +136,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
             var result = await WorkflowInstances.FindAsync(x => ids.Contains(x.Id));
             return await result.ToListAsync();
-        }
-
-        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
-        {
-            IQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
-
-            if (status.HasValue)
-                result = result.Where(x => x.Status == status.Value);
-
-            if (!String.IsNullOrEmpty(type))
-                result = result.Where(x => x.WorkflowDefinitionId == type);
-
-            if (createdFrom.HasValue)
-                result = result.Where(x => x.CreateTime >= createdFrom.Value);
-
-            if (createdTo.HasValue)
-                result = result.Where(x => x.CreateTime <= createdTo.Value);
-
-            return result.Skip(skip).Take(take).ToList();
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
@@ -154,10 +151,10 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public void EnsureStoreExists()
         {
-
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey,
+            DateTime asOf)
         {
             var query = EventSubscriptions
                 .Find(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
@@ -219,8 +216,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            if (errors.Any())
-                await ExecutionErrors.InsertManyAsync(errors);
+            var executionErrors = errors as IReadOnlyList<ExecutionError> ?? errors.ToArray();
+            if (executionErrors.Any())
+                await ExecutionErrors.InsertManyAsync(executionErrors);
         }
     }
 }

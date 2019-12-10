@@ -2,6 +2,7 @@
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
+// ReSharper disable CheckNamespace
 
 namespace WorkflowCore.Services
 {
@@ -9,30 +10,29 @@ namespace WorkflowCore.Services
         where TStepBody : IStepBody
     {
         private readonly IStepBuilder<TData, Sequence> _referenceBuilder;
-        private readonly IStepBuilder<TData, TStepBody> _stepBuilder;
-
-        public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
-
-        public WorkflowStep<TStepBody> Step { get; set; }
+        private readonly IWorkflowBuilder<TData> _builder;
+        private readonly WorkflowStep<TStepBody> _step;
         
+        /// <summary>
+        /// ctor
+        /// </summary>
         public ParallelStepBuilder(IWorkflowBuilder<TData> workflowBuilder, IStepBuilder<TData, TStepBody> stepBuilder, IStepBuilder<TData, Sequence> referenceBuilder)
         {
-            WorkflowBuilder = workflowBuilder;
-            Step = stepBuilder.Step;
-            _stepBuilder = stepBuilder;
+            _builder = workflowBuilder;
+            _step = stepBuilder.Step;
             _referenceBuilder = referenceBuilder;
         }
         
         /// <inheritdoc />
         public IParallelStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
-            var lastStep = WorkflowBuilder.LastStep;
-            builder.Invoke(WorkflowBuilder);
+            var lastStep = _builder.LastStep;
+            builder.Invoke(_builder);
             
-            if (lastStep == WorkflowBuilder.LastStep)
+            if (lastStep == _builder.LastStep)
                 throw new NotSupportedException("Empty Do block not supported");
             
-            Step.Children.Add(lastStep + 1); //TODO: make more elegant
+            _step.Children.Add(lastStep + 1); //TODO: make more elegant
 
             return this;
         }

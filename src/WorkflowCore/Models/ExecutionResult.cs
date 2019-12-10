@@ -21,8 +21,17 @@ namespace WorkflowCore.Models
 
         public object PersistenceData { get; set; }
 
+        /// <summary>
+        /// Event name to wait
+        /// </summary>
         public string EventName { get; set; }
+        /// <summary>
+        /// Event names to wait
+        /// </summary>
         public List<string> EventsNames { get; set; }
+        /// <summary>
+        /// Event key to wait
+        /// </summary>
         public string EventKey { get; set; }
 
         public DateTime EventAsOf { get; set; }

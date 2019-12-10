@@ -15,7 +15,6 @@ namespace WorkflowCore.Persistence.SqlServer
         private readonly string _schema;
 
         public SqlServerContext(string connectionString, string schema, string tablePrefix)
-            : base()
         {
             if (!connectionString.Contains("MultipleActiveResultSets"))
                 connectionString += ";MultipleActiveResultSets=True";

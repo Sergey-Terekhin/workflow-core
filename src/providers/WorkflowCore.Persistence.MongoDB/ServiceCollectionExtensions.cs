@@ -3,6 +3,8 @@ using System;
 using System.Linq;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.MongoDB.Services;
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMethodReturnValue.Global
 
 namespace Microsoft.Extensions.DependencyInjection
 {

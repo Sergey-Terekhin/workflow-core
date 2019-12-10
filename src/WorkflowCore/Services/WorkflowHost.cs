@@ -6,9 +6,13 @@ using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="IWorkflowHost"/>
+    /// </summary>
     public class WorkflowHost : IWorkflowHost, IDisposable
     {
         private bool _shutdown = true;
@@ -26,16 +30,17 @@ namespace WorkflowCore.Services
         private IPersistenceProvider PersistenceStore { get; }
         private IDistributedLockProvider LockProvider { get; }
         private IWorkflowRegistry Registry { get; }
-        private WorkflowOptions Options { get; }
         private IQueueProvider QueueProvider { get; }
         private ILogger Logger { get; }
 
         private readonly ILifeCycleEventHub _lifeCycleEventHub;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public WorkflowHost(
             IPersistenceProvider persistenceStore,
-            IQueueProvider queueProvider, 
-            WorkflowOptions options,
+            IQueueProvider queueProvider,
             ILoggerFactory loggerFactory,
             IWorkflowRegistry registry,
             IDistributedLockProvider lockProvider, 
@@ -45,7 +50,6 @@ namespace WorkflowCore.Services
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
-            Options = options;
             Logger = loggerFactory.CreateLogger<WorkflowHost>();
             Registry = registry;
             LockProvider = lockProvider;

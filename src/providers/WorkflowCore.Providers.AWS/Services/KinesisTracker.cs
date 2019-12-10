@@ -5,21 +5,18 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Providers.AWS.Interface;
 
 namespace WorkflowCore.Providers.AWS.Services
 {
     public class KinesisTracker : IKinesisTracker
     {
-        private readonly ILogger _logger;
         private readonly AmazonDynamoDBClient _client;
         private readonly string _tableName;
-        private bool _tableConfirmed = false;
+        private bool _tableConfirmed;
 
-        public KinesisTracker(AWSCredentials credentials, RegionEndpoint region, string tableName, ILoggerFactory logFactory)
+        public KinesisTracker(AWSCredentials credentials, RegionEndpoint region, string tableName)
         {
-            _logger = logFactory.CreateLogger(GetType());
             _client = new AmazonDynamoDBClient(credentials, region);
             _tableName = tableName;
         }
@@ -105,7 +102,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             try
             {
-                var poll = await _client.DescribeTableAsync(_tableName);
+                await _client.DescribeTableAsync(_tableName);
                 _tableConfirmed = true;
             }
             catch (ResourceNotFoundException)

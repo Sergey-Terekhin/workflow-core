@@ -68,7 +68,7 @@ namespace WorkflowCore.Providers.Redis.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(default(EventId), ex, $"Error on event subscriber: {ex.Message}");
+                    _logger.LogWarning(default, ex, "Error on event subscriber: {Error}", ex.Message);
                 }
             }
         }

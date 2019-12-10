@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
+// ReSharper disable PartialTypeWithSinglePart
+// ReSharper disable UnusedMember.Global
 
 namespace WorkflowCore.Persistence.MySQL.Migrations
 {

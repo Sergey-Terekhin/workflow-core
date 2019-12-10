@@ -7,6 +7,9 @@ using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
 {
+    /// <summary>
+    /// Implementation of <see cref="ILifeCycleEventPublisher"/>
+    /// </summary>
     public class LifeCycleEventPublisher : ILifeCycleEventPublisher, IDisposable
     {
         private readonly ILifeCycleEventHub _eventHub;
@@ -14,6 +17,11 @@ namespace WorkflowCore.Services
         private readonly BlockingCollection<LifeCycleEvent> _outbox;
         private Task _dispatchTask;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="eventHub">instance of <see cref="ILifeCycleEventHub"/> to publish events into </param>
+        /// <param name="loggerFactory">instance of logger factory</param>
         public LifeCycleEventPublisher(ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
         {
             _eventHub = eventHub;

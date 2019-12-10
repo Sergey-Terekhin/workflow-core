@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models.LifeCycleEvents;
+// ReSharper disable CheckNamespace
 
 namespace WorkflowCore.Services
 {
@@ -12,6 +13,9 @@ namespace WorkflowCore.Services
         private readonly ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public SingleNodeEventHub(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<SingleNodeEventHub>();

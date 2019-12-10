@@ -68,6 +68,6 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="id">Identifier of the step</param>
         /// <returns></returns>
-        IEnumerable<WorkflowStep> GetUpstreamSteps(int id);
+        IReadOnlyList<WorkflowStep> GetUpstreamSteps(int id);
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Amazon.Runtime;
 using Amazon.SQS;
 using Amazon.SQS.Model;
@@ -11,18 +10,16 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Providers.AWS.Services
 {
-    public class SQSQueueProvider : IQueueProvider
+    public class SqsQueueProvider : IQueueProvider
     {
         private const int WaitTime = 5;
-        private readonly ILogger _logger;
         private readonly IAmazonSQS _client;
         private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>();
 
         public bool IsDequeueBlocking => true;
 
-        public SQSQueueProvider(AWSCredentials credentials, AmazonSQSConfig config, ILoggerFactory logFactory)
+        public SqsQueueProvider(AWSCredentials credentials, AmazonSQSConfig config)
         {
-            _logger = logFactory.CreateLogger<SQSQueueProvider>();
             _client = new AmazonSQSClient(credentials, config);
         }
 

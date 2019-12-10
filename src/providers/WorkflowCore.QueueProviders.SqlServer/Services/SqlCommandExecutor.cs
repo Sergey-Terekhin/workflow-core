@@ -1,18 +1,15 @@
-﻿#region using
-
-using System;
-using System.Data;
+﻿using System;
 using System.Data.Common;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;
-
-#endregion
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
     public class SqlCommandExecutor : ISqlCommandExecutor
     {
-        public TResult ExecuteScalar<TResult>(IDbConnection cn, IDbTransaction tx, string cmdtext, params DbParameter[] parameters)
+        public TResult ExecuteScalar<TResult>(DbConnection cn, DbTransaction tx, string cmdtext, params DbParameter[] parameters)
         {
             using (var cmd = cn.CreateCommand())
             {
@@ -26,7 +23,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
         }
 
-        public int ExecuteCommand(IDbConnection cn, IDbTransaction tx, string cmdtext, params DbParameter[] parameters)
+        public int ExecuteCommand(DbConnection cn, DbTransaction tx, string cmdtext, params DbParameter[] parameters)
         {
             using (var cmd = cn.CreateCommand())
             {
@@ -40,13 +37,34 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
         }
 
-        private IDbCommand CreateCommand(IDbConnection cn, IDbTransaction tx, string cmdtext)
+        public async Task<TResult> ExecuteScalarAsync<TResult>(DbConnection cn, DbTransaction tx, string cmdtext, CancellationToken token = default,
+            params DbParameter[] parameters)
         {
-            var cmd = cn.CreateCommand();
-            cmd.Transaction = tx;
-            cmd.CommandText = cmdtext;
+            using (var cmd = cn.CreateCommand())
+            {
+                cmd.Transaction = tx;
+                cmd.CommandText = cmdtext;                
 
-            return cmd;
+                foreach (var param in parameters)
+                    cmd.Parameters.Add(param);
+                
+                return (TResult)await cmd.ExecuteScalarAsync(token);
+            }
+        }
+
+        public async Task<int> ExecuteCommandAsync(DbConnection cn, DbTransaction tx, string cmdtext, CancellationToken token = default,
+            params DbParameter[] parameters)
+        {
+            using (var cmd = cn.CreateCommand())
+            {
+                cmd.Transaction = tx;
+                cmd.CommandText = cmdtext;
+
+                foreach (var param in parameters)
+                    cmd.Parameters.Add(param);
+
+                return await cmd.ExecuteNonQueryAsync(token);
+            }
         }
     }
 }

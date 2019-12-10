@@ -2,36 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.Providers.Redis.Services
 {
     public class RedisPersistenceProvider : IPersistenceProvider
     {
-        private readonly ILogger _logger;
-        private readonly string _connectionString;
         private readonly string _prefix;
         private const string WORKFLOW_SET = "workflows";
         private const string SUBSCRIPTION_SET = "subscriptions";
         private const string EVENT_SET = "events";
         private const string RUNNABLE_INDEX = "runnable";
         private const string EVENTSLUG_INDEX = "eventslug";
-        private readonly IConnectionMultiplexer _multiplexer;
         private readonly IDatabase _redis;
 
-        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
-        public RedisPersistenceProvider(string connectionString, string prefix, ILoggerFactory logFactory)
+        public RedisPersistenceProvider(string connectionString, string prefix)
         {
-            _connectionString = connectionString;
             _prefix = prefix;
-            _logger = logFactory.CreateLogger(GetType());
-            _multiplexer = ConnectionMultiplexer.Connect(_connectionString);
-            _redis = _multiplexer.GetDatabase();
+            var multiplexer = ConnectionMultiplexer.Connect(connectionString);
+            _redis = multiplexer.GetDatabase();
         }
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
@@ -63,12 +58,6 @@ namespace WorkflowCore.Providers.Redis.Services
             return result;
         }
 
-        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip,
-            int take)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
             var raw = await _redis.HashGetAsync($"{_prefix}.{WORKFLOW_SET}", Id);
@@ -91,12 +80,15 @@ namespace WorkflowCore.Providers.Redis.Services
             subscription.Id = Guid.NewGuid().ToString();
             var str = JsonConvert.SerializeObject(subscription, _serializerSettings);
             await _redis.HashSetAsync($"{_prefix}.{SUBSCRIPTION_SET}", subscription.Id, str);
-            await _redis.SortedSetAddAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{subscription.EventName}-{subscription.EventKey}", subscription.Id, subscription.SubscribeAsOf.Ticks);
+            await _redis.SortedSetAddAsync(
+                $"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{subscription.EventName}-{subscription.EventKey}", 
+                subscription.Id, 
+                subscription.SubscribeAsOf.Ticks);
 
             return subscription.Id;
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
         {
             var result = new List<EventSubscription>();
             var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{eventName}-{eventKey}", -1, asOf.Ticks);

@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using System;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+// ReSharper disable InconsistentNaming
 
 namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 {
@@ -13,8 +13,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
     public class RabbitMQProvider : IQueueProvider
     {
         private readonly IConnectionFactory _connectionFactory;
-        private IConnection _connection = null;
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private IConnection _connection;
 
         public bool IsDequeueBlocking => false;
 

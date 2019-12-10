@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+// ReSharper disable PartialTypeWithSinglePart
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {

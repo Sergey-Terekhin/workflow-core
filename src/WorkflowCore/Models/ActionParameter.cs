@@ -22,7 +22,7 @@ namespace WorkflowCore.Models
             _action = action;
         }
 
-        private void Assign(object data, IStepBody step, IStepExecutionContext context)
+        private void Assign(object data, IStepBody step)
         {
             _action.Invoke((TStepBody)step, (TData)data);
         }
@@ -30,13 +30,13 @@ namespace WorkflowCore.Models
         /// <inheritdoc />
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
         {
-            Assign(data, body, context);
+            Assign(data, body);
         }
 
         /// <inheritdoc />
         public void AssignOutput(object data, IStepBody body, IStepExecutionContext context)
         {
-            Assign(data, body, context);
+            Assign(data, body);
         }
     }
 }

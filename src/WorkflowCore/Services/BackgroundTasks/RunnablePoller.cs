@@ -17,7 +17,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly WorkflowOptions _options;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IDistributedLockProvider lockProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
             _queueProvider = queueProvider;
@@ -51,7 +51,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 const string pollRunnablesLock = "poll_runnables";
-                if (await _lockProvider.AcquireLock(pollRunnablesLock, new CancellationToken()))
+                if (await _lockProvider.AcquireLock(pollRunnablesLock))
                 {
                     try
                     {
@@ -84,7 +84,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 const string unprocessedEventsLock = "unprocessed_events";
-                if (await _lockProvider.AcquireLock(unprocessedEventsLock, new CancellationToken()))
+                if (await _lockProvider.AcquireLock(unprocessedEventsLock))
                 {
                     try
                     {

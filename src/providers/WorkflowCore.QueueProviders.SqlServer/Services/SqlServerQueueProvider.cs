@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,8 +48,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private static string GetFromResource(string file)
         {
             var resName = $"WorkflowCore.QueueProviders.SqlServer.SqlCommands.{file}.sql";
-
-            using (var reader = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream(resName)))
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resName) ?? throw new MissingManifestResourceException(resName);
+            using (var reader = new StreamReader(stream))
             {
                 return reader.ReadToEnd();
             }
@@ -95,7 +96,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 cn.Open();
                 var par = _config.GetByQueue(queue);
 
-                _sqlCommandExecutor.ExecuteCommand(cn, null, _queueWorkCommand,
+                await _sqlCommandExecutor.ExecuteCommandAsync(cn, null, _queueWorkCommand,
+                    CancellationToken.None,
                     new SqlParameter("@initiatorService", par.InitiatorService),
                     new SqlParameter("@targetService", par.TargetService),
                     new SqlParameter("@contractName", par.ContractName),
@@ -118,13 +120,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         /// <returns>Next id from queue, null if no message arrives in one second.</returns>
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            SqlConnection cn = new SqlConnection(_connectionString);
+            var cn = new SqlConnection(_connectionString);
             try
             {
-                cn.Open();
+                await cn.OpenAsync(cancellationToken);
                 var par = _config.GetByQueue(queue);                
                 var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
-                var msg = _sqlCommandExecutor.ExecuteScalar<object>(cn, null, sql);
+                var msg = await _sqlCommandExecutor.ExecuteScalarAsync<object>(cn, null, sql, cancellationToken);
                 return msg is DBNull ? null : (string)msg;
                 
             }

@@ -14,7 +14,7 @@ namespace WorkflowCore.LockProviders.Redlock.Services
     {
         private readonly RedLockFactory _redlockFactory;
         private readonly TimeSpan _lockTimeout = TimeSpan.FromMinutes(10);
-        private readonly List<IRedLock> ManagedLocks = new List<IRedLock>();
+        private readonly List<IRedLock> _managedLocks = new List<IRedLock>();
 
         public RedlockProvider(params DnsEndPoint[] endpoints)
         {
@@ -28,16 +28,16 @@ namespace WorkflowCore.LockProviders.Redlock.Services
 
         }
 
-        public async Task<bool> AcquireLock(string Id, CancellationToken token)
+        public async Task<bool> AcquireLock(string id, CancellationToken token)
         {
             
-            var redLock = await _redlockFactory.CreateLockAsync(Id, _lockTimeout);
+            var redLock = await _redlockFactory.CreateLockAsync(id, _lockTimeout);
 
             if (redLock.IsAcquired)
             {
-                lock (ManagedLocks)
+                lock (_managedLocks)
                 {
-                    ManagedLocks.Add(redLock);
+                    _managedLocks.Add(redLock);
                 }
                 return true;
             }
@@ -47,16 +47,16 @@ namespace WorkflowCore.LockProviders.Redlock.Services
 
 
 
-        public Task ReleaseLock(string Id)
+        public Task ReleaseLock(string id)
         {
-            lock (ManagedLocks)
+            lock (_managedLocks)
             {
-                foreach (var redLock in ManagedLocks)
+                foreach (var redLock in _managedLocks)
                 {
-                    if (redLock.Resource == Id)
+                    if (redLock.Resource == id)
                     {
                         redLock.Dispose();
-                        ManagedLocks.Remove(redLock);
+                        _managedLocks.Remove(redLock);
                         break;
                     }
                 }

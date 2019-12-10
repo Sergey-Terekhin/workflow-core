@@ -1,9 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace WorkflowCore.Persistence.EntityFramework.Models
 {    
+    
     public class PersistedExecutionError
     {
         [Key]

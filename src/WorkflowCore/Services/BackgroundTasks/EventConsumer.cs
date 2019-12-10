@@ -17,7 +17,13 @@ namespace WorkflowCore.Services.BackgroundTasks
         protected override int MaxConcurrentItems => 2;
         protected override QueueType Queue => QueueType.Event;
 
-        public EventConsumer(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
+        public EventConsumer(
+            IPersistenceProvider persistenceStore, 
+            IQueueProvider queueProvider, 
+            ILoggerFactory loggerFactory,
+            IDistributedLockProvider lockProvider,
+            WorkflowOptions options, 
+            IDateTimeProvider datetimeProvider)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceStore;
@@ -39,7 +45,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 var evt = await _persistenceStore.GetEvent(itemId);
                 if (evt.EventTime <= _datetimeProvider.Now.ToUniversalTime())
                 {
-                    var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
+                    var subs = await _persistenceStore.GetSubscriptions(evt.EventName, evt.EventKey, evt.EventTime);
                     var toQueue = new List<string>();
                     var complete = true;
 
